@@ -1,0 +1,27 @@
+[
+  {
+    "username": "ridho_stream",
+    "email": "ridho@example.com",
+    "password": "1234567890",
+    "name": "Ridho Gaming",
+    "avatarUrl": "https://cdn.example.com/avatars/ridho.jpg",
+    "overlayKey": "a3f4b1c8e9d2",
+    "role": "streamer"
+  },
+  {
+    "username": "SuperAdmin",
+    "email": "admin@example.com",
+    "password": "1234567890",
+    "name": "Admin Sbubu",
+    "avatarUrl": "https://cdn.example.com/avatars/admin.jpg",
+    "role": "admin"
+  },
+  {
+    "username": "deankt",
+    "email": "deanktgg@gmail.com",
+    "password": "1234567890",
+    "name": "Nina Art",
+    "avatarUrl": "https://cdn.example.com/avatars/nina.jpg",
+    "role": "streamer"
+  }
+]
