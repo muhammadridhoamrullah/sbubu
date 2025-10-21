@@ -1,0 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Bungee&family=Share+Tech&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Share Tech", ui-sans-serif, system-ui, sans-serif;
+  --font-bungee: "Bungee", cursive;
+}
