@@ -1,7 +1,9 @@
 import { createBrowserRouter, redirect } from "react-router-dom";
 import Register from "./pages/(Non-Auth)/Register";
-import MainLayout from "./components/MainLayout";
 import Profile from "./pages/(Auth)/Profile";
+import NonAuthLayout from "./components/NonAuthLayout";
+import AuthLayout from "./components/AuthLayout";
+import Login from "./pages/(Non-Auth)/Login";
 
 function checkLogin() {
   if (!localStorage.access_token) {
@@ -11,15 +13,37 @@ function checkLogin() {
   return null;
 }
 
+function preventAuthAccess() {
+  if (localStorage.access_token) {
+    return redirect("/app/profile");
+  }
+  return null;
+}
+
 const router = createBrowserRouter([
   {
-    path: "/register",
-    element: <Register />,
+    path: "/",
+    element: <div>Ini Landing Page</div>,
   },
   {
-    path: "/",
+    path: "/auth",
+    loader: preventAuthAccess,
+    element: <NonAuthLayout />,
+    children: [
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
+    ],
+  },
+  {
+    path: "/app",
     loader: checkLogin,
-    element: <MainLayout />,
+    element: <AuthLayout />,
     children: [
       {
         path: "profile",
