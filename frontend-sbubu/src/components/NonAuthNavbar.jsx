@@ -3,14 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 export default function NonAuthNavbar() {
   const path = useLocation().pathname;
 
-  console.log(path, "ini path");
-
   function isActive(pathname) {
     return path === pathname
       ? "border-b-2 "
       : "border-b-2 border-b-gray-600 text-gray-400 hover:text-white";
   }
-  console.log(isActive, "< is");
 
   return (
     <div className="w-1/2 h-fit text-white flex flex-col gap-8 justify-start items-center ">

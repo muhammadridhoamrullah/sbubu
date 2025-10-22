@@ -1,6 +1,6 @@
-import GenerateMetadata from "../../components/GenerateMetadata";
+import GenerateMetadata from "../../../components/GenerateMetadata";
 
-export default function Profile() {
+export default function Creator() {
   const metadata = {
     title: "SBUBU- Profile",
     description: "Profile page for SBUBU users",
@@ -10,7 +10,7 @@ export default function Profile() {
   return (
     <>
       <GenerateMetadata data={metadata} />
-      <div>Ini Profile</div>
+      <div>Ini page Creator</div>
     </>
   );
 }
