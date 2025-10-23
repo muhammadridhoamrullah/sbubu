@@ -5,7 +5,8 @@ import AuthLayout from "./components/AuthLayout";
 import Login from "./pages/(Non-Auth)/Login";
 import AfterLogInLayout from "./components/AfterLogInLayout";
 import Creator from "./pages/(Auth)/(C)/Creator";
-import Personal from "./pages/(Auth)/Personal";
+import Personal from "./pages/(Auth)/(me)/Personal";
+import DonationPage from "./pages/(Non-Auth)/DonationPage";
 
 function checkLogin() {
   if (!localStorage.access_token) {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
         element: <Register />,
       },
     ],
+  },
+  {
+    path: "/:username",
+    element: <DonationPage />,
   },
   {
     path: "/c",

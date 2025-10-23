@@ -27,6 +27,16 @@ async function errorHandler(err, req, res, next) {
     res.status(401).json({ message: "Invalid Email/Username or Password" });
   } else if (err.name === "USER_LOGIN_EMAIL_NOT_VERIFIED") {
     res.status(401).json({ message: "Email is not verified" });
+  } else if (err.name === "DONATION_CREATE_INPUT_ERROR") {
+    res.status(400).json({ message: "Donor Name and Amount are required" });
+  } else if (err.name === "DONATION_CREATE_INPUT_AMOUNT_ERROR") {
+    res.status(400).json({ message: "Minimum donation amount is 5000" });
+  } else if (err.name === "STREAMER_NOT_FOUND") {
+    res.status(404).json({ message: "Streamer not found" });
+  } else if (err.name === "DONATION_NOT_FOUND") {
+    res.status(404).json({ message: "Donation not found" });
+  } else if (err.name === "UNAUTHORIZED") {
+    res.status(401).json({ message: "Unauthorized" });
   }
 }
 

@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      User.hasMany(models.Donation, {
+        foreignKey: "UserId",
+        as: "ReceivedDonations",
+      });
     }
   }
   User.init(
@@ -122,3 +126,6 @@ module.exports = (sequelize, DataTypes) => {
   });
   return User;
 };
+
+
+// banner, social media links
