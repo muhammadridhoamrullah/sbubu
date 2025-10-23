@@ -112,6 +112,63 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         defaultValue: null,
       },
+      bio: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      totalEarnings: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      alertSettings: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: {
+          soundEnabled: true,
+          soundUrl: "/sounds/alamakDuitNi.mp3",
+          minAmount: 5000,
+          displayDuration: 10,
+          animationType: "slide",
+        },
+      },
+      overlaySettings: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: {
+          theme: "default",
+          fontFamily: "Arial",
+          fontSize: 24,
+          textColor: "#FFFFFF",
+          backgroundColor: "rgba(0,0,0,0.8)",
+        },
+      },
+      bankAccount: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: {
+          bankName: null,
+          accountNumber: null,
+          accountHolderName: null,
+        },
+      },
+      banner: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: "/image/defaultBanner2.jpg",
+      },
+      socialMediaLinks: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: {
+          instagram: null,
+          twitter: null,
+          tiktok: null,
+          youtube: null,
+          facebook: null,
+          threads: null,
+        },
+      },
     },
     {
       sequelize,
@@ -127,5 +184,4 @@ module.exports = (sequelize, DataTypes) => {
   return User;
 };
 
-
-// banner, social media links
+// banner, social media links, bio, totalEarnings, alertSettings, overlaySettings, bankAccount
