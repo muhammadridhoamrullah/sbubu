@@ -87,7 +87,7 @@ class DonationController {
         },
         customer_details: {
           first_name: donorName,
-          email: donorEmail || "no-email@provided.com",
+          email: donorEmail,
         },
       };
 
@@ -105,6 +105,12 @@ class DonationController {
         messageType: "text",
         status: "pending",
         midtransToken: midtransToken.token,
+      });
+      console.log("Berhasil", {
+        id: newDonation.id,
+        OrderId: newDonation.OrderId,
+        amount: newDonation.amount,
+        donorName: newDonation.donorName,
       });
 
       res.status(201).json({

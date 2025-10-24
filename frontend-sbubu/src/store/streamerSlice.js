@@ -33,7 +33,6 @@ export function fetchStreamerData(username) {
       dispatch(streamerRequest());
 
       const response = await instance.get(`/donation/${username}`);
-      console.log(response.data, "<< ini di sliceStreamer");
 
       dispatch(streamerSuccess(response.data));
     } catch (error) {

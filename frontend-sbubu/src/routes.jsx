@@ -25,7 +25,7 @@ function preventAuthAccess() {
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/sucess-payment",
     element: <div>Ini Landing Page</div>,
   },
   {

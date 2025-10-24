@@ -17,6 +17,8 @@ import { FiYoutube } from "react-icons/fi";
 import { LuFacebook } from "react-icons/lu";
 
 import { BsThreads } from "react-icons/bs";
+import MenuHadiah from "../../components/MenuHadiah";
+import MenuSoundboard from "../../components/MenuSoundboard";
 
 export default function DonationPage() {
   const { username } = useParams();
@@ -26,9 +28,10 @@ export default function DonationPage() {
     data: dataStreamer,
     error: errorStreamer,
   } = useSelector((state) => state.streamer);
-  console.log(loadingStreamer, errorStreamer, dataStreamer, "<< ini dia coy");
 
   const [showDropdownProfile, setShowDropdownProfile] = useState(false);
+  // Menu and Hadiah active
+  const [activeMenu, setActiveMenu] = useState("hadiah");
 
   useEffect(() => {
     dispatch(fetchStreamerData(username));
@@ -45,7 +48,11 @@ export default function DonationPage() {
   }
 
   let socialLinks = dataStreamer?.streamer?.socialMediaLinks || {};
-  console.log(socialLinks, "<< ini social links");
+
+  const menuComponents = {
+    hadiah: <MenuHadiah dataStreamer={dataStreamer} />,
+    soundboard: <MenuSoundboard />,
+  };
 
   const metadata = {
     title: `Dukung ${username.toUpperCase()} | SBUBU`,
@@ -188,7 +195,43 @@ export default function DonationPage() {
           </div>
           {/* Akhir Profil */}
           {/* Awal Menu dan Hadiah */}
-          <div className="bg-pink-800 w-full h-fit">Menu dan Hadiah</div>
+          <div className=" w-full h-fit flex justify-between items-start gap-5">
+            {/* Awal Menu dan Soundboard */}
+            <div className="bg-black/70  w-1/4 h-fit flex flex-col justify-start items-start overflow-hidden rounded-xl ">
+              {/* Awal Menu */}
+              <div className="bg-[#1A2B32] w-full h-fit py-1 px-4 text-xl">
+                Menu
+              </div>
+              {/* Akhir Menu */}
+              {/* Awal List Menu */}
+              <div className=" w-full h-fit p-4 flex flex-col gap-2 justify-start items-start">
+                <div
+                  onClick={() => setActiveMenu("hadiah")}
+                  className={`${
+                    activeMenu === "hadiah" ? "bg-pink-700" : "bg-[#1A2B32]"
+                  } w-full h-fit p-3 flex justify-center items-center rounded-md hover:bg-gray-900 cursor-pointer transition-all duration-300`}
+                >
+                  Hadiah
+                </div>
+                <div
+                  onClick={() => setActiveMenu("soundboard")}
+                  className={`${
+                    activeMenu === "soundboard" ? "bg-pink-700" : "bg-[#1A2B32]"
+                  } w-full h-fit p-3 flex justify-center items-center rounded-md hover:bg-gray-900 cursor-pointer transition-all duration-300`}
+                >
+                  Soundboard
+                </div>
+              </div>
+              {/* Akhir List Menu */}
+            </div>
+            {/* Akhir Menu dan Soundboard */}
+
+            {/* Awal Hadiah */}
+            <div className="bg-black/70 w-3/4 h-fit  overflow-hidden rounded-xl ">
+              {menuComponents[activeMenu]}
+            </div>
+            {/* Akhir Hadiah */}
+          </div>
           {/* Akhir Menu dan Hadiah */}
         </div>
       </div>
@@ -197,3 +240,4 @@ export default function DonationPage() {
 }
 
 // bg-[#111D22]
+// bg-[#1A2B32]
