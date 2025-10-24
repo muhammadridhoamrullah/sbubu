@@ -7,6 +7,8 @@ import AfterLogInLayout from "./components/AfterLogInLayout";
 import Creator from "./pages/(Auth)/(C)/Creator";
 import Personal from "./pages/(Auth)/(me)/Personal";
 import DonationPage from "./pages/(Non-Auth)/DonationPage";
+import SuccessPayment from "./pages/(Non-Auth)/Transaction";
+import Transaction from "./pages/(Non-Auth)/Transaction";
 
 function checkLogin() {
   if (!localStorage.access_token) {
@@ -25,8 +27,8 @@ function preventAuthAccess() {
 
 const router = createBrowserRouter([
   {
-    path: "/sucess-payment",
-    element: <div>Ini Landing Page</div>,
+    path: "/transaction/:orderId",
+    element: <Transaction />,
   },
   {
     path: "/auth",

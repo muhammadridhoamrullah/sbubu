@@ -5,10 +5,12 @@ import { lakukanPembayaran } from "../store/pembayaranSlice";
 import { AiOutlineLoading } from "react-icons/ai";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import instance from "../axiosInstance";
 
 export default function MenuHadiah({ dataStreamer }) {
   const username = dataStreamer?.streamer?.username;
   const navigate = useNavigate();
+  const [isSnapReady, setIsSnapReady] = useState(false);
 
   const dispatch = useDispatch();
   const { loading, data, error, isCompleted } = useSelector(
@@ -76,17 +78,59 @@ export default function MenuHadiah({ dataStreamer }) {
     dispatch(lakukanPembayaran(payload, username));
   }
 
+  // memunculkan window snap pay
+  useEffect(() => {
+    if (isCompleted && data?.midtransToken) {
+      if (!window.snap) {
+        toast.error("Midtrans snap belum siap. Silakan coba lagi nanti.");
+        return;
+      }
+
+      window.snap.pay(data?.midtransToken, {
+        onSuccess: async function (result) {
+          // Hit API midtrans-webhook untuk update status pembayaran
+          const response = await instance.post("/donation/midtrans-webhook", {
+            order_id: result.order_id,
+            transaction_status: result.transaction_status,
+            fraud_status: result.fraud_status,
+            data: result,
+          });
+
+          // Payment Type, transaction_time, gross_amount, transaction_status, order_id
+          const paymentData = {
+            order_id: result.order_id,
+            payment_type: result.payment_type,
+            transaction_time: result.transaction_time,
+            gross_amount: result.gross_amount,
+            transaction_status: result.transaction_status,
+          };
+
+          navigate(`/transaction/${result.order_id}`);
+        },
+        onPending: async function (result) {
+          /* You may add your own implementation here */
+          alert("wating your payment!");
+          console.log(result, "ini pending");
+          navigate(`/transaction/${result.order_id}`);
+        },
+        onError: async function (result) {
+          /* You may add your own implementation here */
+          alert("payment failed!");
+          console.log(result);
+        },
+        onClose: async function () {
+          /* You may add your own implementation here */
+          alert("you closed the popup without finishing the payment");
+        },
+      });
+    }
+  }, [isCompleted, data]);
+
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
   }, [error]);
-
-  useEffect(() => {
-    if (isCompleted && data) {
-      navigate("/success-payment", { state: { paymentData: data } });
-    }
-  }, [isCompleted, data, navigate]);
 
   return (
     <div className=" w-full h-fit flex flex-col  justify-start items-start">
@@ -289,3 +333,28 @@ export default function MenuHadiah({ dataStreamer }) {
     </div>
   );
 }
+
+// onSuccess pakai credit card
+
+// {
+//     "status_code": "200",
+//     "status_message": "Success, Credit Card capture transaction is successful",
+//     "transaction_id": "5e371ffa-e1c9-4db9-b1c5-3a33eb44e979",
+//     "order_id": "DON-ridhoamrullah-1761312121903-9722",
+//     "gross_amount": "10000.00",
+//     "payment_type": "credit_card",
+//     "transaction_time": "2025-10-24 20:22:16",
+//     "transaction_status": "capture",
+//     "fraud_status": "accept",
+//     "bank": "cimb",
+//     "masked_card": "48111111-1114",
+//     "card_type": "credit",
+//     "finish_redirect_url": "http://example.com?order_id=DON-ridhoamrullah-1761312121903-9722&status_code=200&transaction_status=capture"
+// }
+
+// {
+//    "bank": "cimb",
+// "order_id": "DON-ridhoamrullah-1761313108701-3340", "card_type": "credit", "masked_card": "48111111-1114", "status_code": "200", "fraud_status": "accept", "gross_amount": "100000.00", "payment_type": "credit_card", "status_message": "Success, Credit Card capture transaction is successful", "transaction_id": "a36deae3-5066-4961-b9fc-4fee1ca2245b", "transaction_time": "2025-10-24 20:38:40", "transaction_status": "capture", "finish_redirect_url": "http://example.com?order_id=DON-ridhoamrullah-1761313108701-3340&status_code=200&transaction_status=capture"}
+
+// onSuccess final midtransResponse
+// {"order_id": "DON-ridhoamrullah-1761312776088-6785", "fraud_status": "accept", "transaction_status": "capture"}

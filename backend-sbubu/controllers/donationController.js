@@ -134,7 +134,7 @@ class DonationController {
   static async midtransWebhook(req, res, next) {
     try {
       // ambil data dari midtrans
-      const { order_id, transaction_status, fraud_status } = req.body;
+      const { order_id, transaction_status, fraud_status, data } = req.body;
 
       console.log("Midtrans webhook", req.body);
 
@@ -177,12 +177,12 @@ class DonationController {
       await Donation.update(
         {
           status: newStatus,
-          midtransResponse: req.body,
+          midtransResponse: data,
           paidAt: newStatus === "success" ? new Date() : null,
         },
         {
           where: {
-            id: donation.id,
+            OrderId: order_id,
           },
         }
       );
