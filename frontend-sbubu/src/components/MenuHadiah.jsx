@@ -7,23 +7,27 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import instance from "../axiosInstance";
 
-export default function MenuHadiah({ dataStreamer }) {
+export default function MenuHadiah({ dataStreamer, dataUser }) {
   const username = dataStreamer?.streamer?.username;
+
   const navigate = useNavigate();
-  const [isSnapReady, setIsSnapReady] = useState(false);
 
   const dispatch = useDispatch();
   const { loading, data, error, isCompleted } = useSelector(
     (state) => state.pembayaran
   );
+
   const [hideFromCreator, setHideFromCreator] = useState(false);
+  const [awalDikirimSebagai, setAwalDikirimSebagai] = useState(true);
+  console.log(awalDikirimSebagai, "awal");
 
   const [formDonation, setFormDonation] = useState({
-    donorName: "",
-    donorEmail: "",
+    donorName: dataUser && awalDikirimSebagai ? dataUser?.username : "",
+    donorEmail: dataUser && awalDikirimSebagai ? dataUser?.email : "",
     amount: 0,
     message: "",
   });
+  console.log(formDonation, "formD");
 
   //   function changeHandler
   function changeHandler(e) {
@@ -115,6 +119,8 @@ export default function MenuHadiah({ dataStreamer }) {
         },
         onPending: async function (result) {
           // HIT API midtrans-webhook untuk update status pembayaran
+          console.log(result, "<< ONPENDING");
+
           try {
             const response = await instance.post("/donation/midtrans-webhook", {
               order_id: result.order_id,
@@ -183,6 +189,16 @@ export default function MenuHadiah({ dataStreamer }) {
     }
   }, [error]);
 
+  function changeDikirimSebagai() {
+    setAwalDikirimSebagai(false);
+    setFormDonation({
+      donorName: "",
+      donorEmail: "",
+      amount: formDonation.amount, // Keep amount
+      message: formDonation.message, // Keep message
+    });
+  }
+
   return (
     <div className=" w-full h-fit flex flex-col  justify-start items-start">
       <Toaster position="top-center" reverseOrder={false} />
@@ -197,75 +213,114 @@ export default function MenuHadiah({ dataStreamer }) {
       >
         {/* Awal Dari dan Email */}
         <div className=" w-full h-fit flex flex-col gap-4 justify-start items-start">
-          {/* Awal Dari */}
-          <div className=" w-full h-fit flex flex-col gap-1 justify-start items-start">
-            <label>
-              Dari <span className="text-red-400">*</span>
-            </label>
-            {/* Awal Input Dari */}
-            <input
-              type="text"
-              name="donorName"
-              id="donorName"
-              value={hideFromCreator ? "Anonymous" : formDonation.donorName}
-              onChange={changeHandler}
-              placeholder="Dewa Beras Gerlong"
-              disabled={hideFromCreator}
-              required
-              className={`outline-none w-full h-10  rounded-md p-2 ${
-                hideFromCreator
-                  ? "bg-red-800 cursor-not-allowed"
-                  : "bg-[#1A2B32] placeholder:text-gray-500"
-              } transition-all duration-1000`}
-            />
-            {/* Akhir Input Dari */}
-          </div>
-          {/* Akhir Dari */}
-          {/* Awal Email */}
-          <div className="w-full h-fit flex flex-col gap-1 justify-start items-start">
-            <label>
-              Email <span className="text-red-500">*</span>
-            </label>
-            {/* Awal Input Email */}
-            <input
-              type="email"
-              name="donorEmail"
-              id="donorEmail"
-              disabled={hideFromCreator}
-              value={
-                hideFromCreator
-                  ? "anonymous@gmail.com"
-                  : formDonation.donorEmail
-              }
-              placeholder="dewaberasgerlong@gmail.com"
-              onChange={changeHandler}
-              required
-              className={`outline-none w-full h-10  rounded-md p-2 ${
-                hideFromCreator
-                  ? "bg-red-800 cursor-not-allowed"
-                  : "bg-[#1A2B32] placeholder:text-gray-500"
-              } transition-all duration-1000`}
-            />
-            {/* Akhir Input Email */}
+          {/* Cek apakah dataUser/Login ada */}
+          {dataUser && awalDikirimSebagai ? (
+            <>
+              {/* Awal Dikirim Oleh */}
+              <div className=" w-full h-fit flex flex-col  gap-2 justify-start items-start">
+                <label>Dikirim Oleh</label>
+                {/* Awal Data User Pengirim */}
+                <div className="bg-pink-700/50 w-fit h-fit flex justify-start items-center gap-2 p-2 rounded-xl">
+                  {/* Awal Avatar Url */}
+                  <div className=" w-10 h-10 relative rounded-full overflow-hidden">
+                    <img
+                      src={dataUser?.avatarUrl}
+                      alt={dataUser?.name}
+                      className="w-full h-full absolute object-cover rounded-full"
+                    />
+                  </div>
+                  {/* Akhir Avatar Url */}
+                  <div className="w-fit h-fit text-xl">
+                    {dataUser?.username}
+                  </div>
+                </div>
+                {/* Akhir Data User Pengirim */}
 
-            {/* Awal Checkbox Sembunyikan dari kreator */}
-            <div className=" flex justify-start items-center gap-2 mt-2">
-              <input
-                type="checkbox"
-                name="hideFromCreator"
-                id="hideFromCreator"
-                checked={hideFromCreator}
-                onChange={() => setHideFromCreator(!hideFromCreator)}
-                className="w-3 h-3 accent-pink-500 cursor-pointer"
-              />
+                {/* Awal Bukan Sebagai User Login */}
+                <div
+                  onClick={() => changeDikirimSebagai()}
+                  className="text-orange-500 text-sm hover:text-orange-900 cursor-pointer"
+                >
+                  Kirim Sebagai Anonymous
+                </div>
+                {/* Akhir Bukan Sebagai User Login */}
+              </div>
+              {/* Akhir Dikirim Oleh */}
+            </>
+          ) : (
+            <>
+              {/* Awal Dari */}
+              <div className=" w-full h-fit flex flex-col gap-1 justify-start items-start">
+                <label>
+                  Dari <span className="text-red-400">*</span>
+                </label>
+                {/* Awal Input Dari */}
+                <input
+                  type="text"
+                  name="donorName"
+                  id="donorName"
+                  value={hideFromCreator ? "Anonymous" : formDonation.donorName}
+                  onChange={changeHandler}
+                  placeholder="Dewa Beras Gerlong"
+                  disabled={hideFromCreator}
+                  required
+                  className={`outline-none w-full h-10  rounded-md p-2 ${
+                    hideFromCreator
+                      ? "bg-red-800 cursor-not-allowed"
+                      : "bg-[#1A2B32] placeholder:text-gray-500"
+                  } transition-all duration-1000`}
+                />
+                {/* Akhir Input Dari */}
+              </div>
+              {/* Akhir Dari */}
+              {/* Awal Email */}
+              <div className="w-full h-fit flex flex-col gap-1 justify-start items-start">
+                <label>
+                  Email <span className="text-red-500">*</span>
+                </label>
+                {/* Awal Input Email */}
+                <input
+                  type="email"
+                  name="donorEmail"
+                  id="donorEmail"
+                  disabled={hideFromCreator}
+                  value={
+                    hideFromCreator
+                      ? "anonymous@gmail.com"
+                      : formDonation.donorEmail
+                  }
+                  placeholder="dewaberasgerlong@gmail.com"
+                  onChange={changeHandler}
+                  required
+                  className={`outline-none w-full h-10  rounded-md p-2 ${
+                    hideFromCreator
+                      ? "bg-red-800 cursor-not-allowed"
+                      : "bg-[#1A2B32] placeholder:text-gray-500"
+                  } transition-all duration-1000`}
+                />
+                {/* Akhir Input Email */}
 
-              <label className="text-sm" htmlFor="hideFromCreator">
-                Kirim sebagai anonymous
-              </label>
-            </div>
-            {/* Akhir Checkbox Sembunyikan dari kreator */}
-          </div>
-          {/* Akhir Email */}
+                {/* Awal Checkbox Sembunyikan dari kreator */}
+                <div className=" flex justify-start items-center gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    name="hideFromCreator"
+                    id="hideFromCreator"
+                    checked={hideFromCreator}
+                    onChange={() => setHideFromCreator(!hideFromCreator)}
+                    className="w-3 h-3 accent-pink-500 cursor-pointer"
+                  />
+
+                  <label className="text-sm" htmlFor="hideFromCreator">
+                    Kirim sebagai anonymous
+                  </label>
+                </div>
+
+                {/* Akhir Checkbox Sembunyikan dari kreator */}
+              </div>
+              {/* Akhir Email */}
+            </>
+          )}
         </div>
         {/* Akhir Dari dan Email */}
 
@@ -409,3 +464,171 @@ export default function MenuHadiah({ dataStreamer }) {
 
 // onSuccess final midtransResponse
 // {"order_id": "DON-ridhoamrullah-1761312776088-6785", "fraud_status": "accept", "transaction_status": "capture"}
+
+// {
+//     "streamer": {
+//         "id": 8,
+//         "username": "ridhoamrullah",
+//         "name": "Muhammad Ridho Amrullah",
+//         "banner": "/image/defaultBanner2.jpg",
+//         "isEmailVerified": true,
+//         "socialMediaLinks": {
+//             "tiktok": "https://www.tiktok.com/@ridhorodhoo",
+//             "threads": "https://www.threads.com/@ridhoamrullah_",
+//             "twitter": "https://x.com/oliviarodrigo",
+//             "youtube": "https://www.youtube.com/@muhammadridhoamrullah366",
+//             "facebook": "https://www.facebook.com/OliviaRodrigoOfficial/",
+//             "instagram": "https://www.instagram.com/ridhoamrullah_/"
+//         },
+//         "avatarUrl": "https://www.billboard.com/wp-content/uploads/2023/07/Olivia-Rodrigo-cr-Larissa-Hofmann-press-04-2023-billboard-1548.jpg?w=942&h=628&crop=1"
+//     }
+// }
+
+// {
+//     "id": 8,
+//     "name": "Muhammad Ridho Amrullah",
+//     "username": "ridhoamrullah",
+//     "email": "ridhoamrullah99@gmail.com",
+//     "role": "admin",
+//     "avatarUrl": "https://www.billboard.com/wp-content/uploads/2023/07/Olivia-Rodrigo-cr-Larissa-Hofmann-press-04-2023-billboard-1548.jpg?w=942&h=628&crop=1",
+//     "overlayKey": "8763c58cd344a86f035c73e207a1a562",
+//     "isEmailVerified": true,
+//     "lastLoginAt": "2025-10-25T14:27:11.915Z",
+//     "deletedAt": null,
+//     "bio": "I think growing up, I always had this idea that more is better, like more friends, more people in your life, going out, more experiences.",
+//     "totalEarnings": "0",
+//     "alertSettings": {
+//         "soundUrl": "/sounds/alamakDuitNi.mp3",
+//         "minAmount": 5000,
+//         "soundEnabled": true,
+//         "animationType": "slide",
+//         "displayDuration": 10
+//     },
+//     "overlaySettings": {
+//         "theme": "default",
+//         "fontSize": 24,
+//         "textColor": "#FFFFFF",
+//         "fontFamily": "Arial",
+//         "backgroundColor": "rgba(0,0,0,0.8)"
+//     },
+//     "bankAccount": {
+//         "bankName": null,
+//         "accountNumber": null,
+//         "accountHolderName": null
+//     },
+//     "banner": "/image/defaultBanner2.jpg",
+//     "socialMediaLinks": {
+//         "tiktok": "https://www.tiktok.com/@ridhorodhoo",
+//         "threads": "https://www.threads.com/@ridhoamrullah_",
+//         "twitter": "https://x.com/oliviarodrigo",
+//         "youtube": "https://www.youtube.com/@muhammadridhoamrullah366",
+//         "facebook": "https://www.facebook.com/OliviaRodrigoOfficial/",
+//         "instagram": "https://www.instagram.com/ridhoamrullah_/"
+//     },
+//     "createdAt": "2025-10-13T13:43:08.049Z",
+//     "updatedAt": "2025-10-25T14:27:11.915Z"
+// }
+
+// {awalDikirimSebagai ? (
+//             <>
+// {/* Awal Dikirim Oleh */}
+// <div className=" w-full h-fit flex flex-col  gap-2 justify-start items-start">
+//   <label>Dikirim Oleh</label>
+//   {/* Awal Data User Pengirim */}
+//   <div className="bg-pink-700/50 w-fit h-fit flex justify-start items-center gap-2 p-2 rounded-xl">
+//     {/* Awal Avatar Url */}
+//     <div className=" w-10 h-10 relative rounded-full overflow-hidden">
+//       <img
+//         src={dataUser?.avatarUrl}
+//         alt={dataUser?.name}
+//         className="w-full h-full absolute object-cover rounded-full"
+//       />
+//     </div>
+//     {/* Akhir Avatar Url */}
+//     <div className="w-fit h-fit text-xl">
+//       {dataUser?.username}
+//     </div>
+//   </div>
+//   {/* Akhir Data User Pengirim */}
+
+//   {/* Awal Bukan Sebagai User Login */}
+//   <div className="text-orange-500 text-sm hover:text-orange-900 cursor-pointer">
+//     Kirim Sebagai Anonymous
+//   </div>
+//   {/* Akhir Bukan Sebagai User Login */}
+// </div>
+// {/* Akhir Dikirim Oleh */}
+//             </>
+//           ) : (
+// <>
+//   {/* Awal Dari */}
+//   <div className=" w-full h-fit flex flex-col gap-1 justify-start items-start">
+//     <label>
+//       Dari <span className="text-red-400">*</span>
+//     </label>
+//     {/* Awal Input Dari */}
+//     <input
+//       type="text"
+//       name="donorName"
+//       id="donorName"
+//       value={hideFromCreator ? "Anonymous" : formDonation.donorName}
+//       onChange={changeHandler}
+//       placeholder="Dewa Beras Gerlong"
+//       disabled={hideFromCreator}
+//       required
+//       className={`outline-none w-full h-10  rounded-md p-2 ${
+//         hideFromCreator
+//           ? "bg-red-800 cursor-not-allowed"
+//           : "bg-[#1A2B32] placeholder:text-gray-500"
+//       } transition-all duration-1000`}
+//     />
+//     {/* Akhir Input Dari */}
+//   </div>
+//   {/* Akhir Dari */}
+//   {/* Awal Email */}
+//   <div className="w-full h-fit flex flex-col gap-1 justify-start items-start">
+//     <label>
+//       Email <span className="text-red-500">*</span>
+//     </label>
+//     {/* Awal Input Email */}
+//     <input
+//       type="email"
+//       name="donorEmail"
+//       id="donorEmail"
+//       disabled={hideFromCreator}
+//       value={
+//         hideFromCreator
+//           ? "anonymous@gmail.com"
+//           : formDonation.donorEmail
+//       }
+//       placeholder="dewaberasgerlong@gmail.com"
+//       onChange={changeHandler}
+//       required
+//       className={`outline-none w-full h-10  rounded-md p-2 ${
+//         hideFromCreator
+//           ? "bg-red-800 cursor-not-allowed"
+//           : "bg-[#1A2B32] placeholder:text-gray-500"
+//       } transition-all duration-1000`}
+//     />
+//     {/* Akhir Input Email */}
+
+//     {/* Awal Checkbox Sembunyikan dari kreator */}
+//     <div className=" flex justify-start items-center gap-2 mt-2">
+//       <input
+//         type="checkbox"
+//         name="hideFromCreator"
+//         id="hideFromCreator"
+//         checked={hideFromCreator}
+//         onChange={() => setHideFromCreator(!hideFromCreator)}
+//         className="w-3 h-3 accent-pink-500 cursor-pointer"
+//       />
+
+//       <label className="text-sm" htmlFor="hideFromCreator">
+//         Kirim sebagai anonymous
+//       </label>
+//     </div>
+//     {/* Akhir Checkbox Sembunyikan dari kreator */}
+//   </div>
+//   {/* Akhir Email */}
+// </>
+//           )}

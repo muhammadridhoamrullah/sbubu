@@ -3,6 +3,7 @@ import registerReducer from "./registerSlice";
 import loginReducer from "./loginSlice";
 import streamerReducer from "./streamerSlice";
 import pembayaranReducer from "./pembayaranSlice";
+import userReducer from "./userSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     login: loginReducer,
     streamer: streamerReducer,
     pembayaran: pembayaranReducer,
+    user: userReducer,
   },
 });

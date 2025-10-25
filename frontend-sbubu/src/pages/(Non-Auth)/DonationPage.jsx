@@ -19,20 +19,33 @@ import { LuFacebook } from "react-icons/lu";
 import { BsThreads } from "react-icons/bs";
 import MenuHadiah from "../../components/MenuHadiah";
 import MenuSoundboard from "../../components/MenuSoundboard";
+import { fetchUserData } from "../../store/userSlice";
+import { doLogout } from "../../store/loginSlice";
 
 export default function DonationPage() {
   const { username } = useParams();
   const dispatch = useDispatch();
+
+  // Data Streamer
   const {
     loading: loadingStreamer,
     data: dataStreamer,
     error: errorStreamer,
   } = useSelector((state) => state.streamer);
 
+  // Data User
+  const {
+    loading: loadingUser,
+    data: dataUser,
+    error: errorUser,
+  } = useSelector((state) => state.user);
+
   const [showDropdownProfile, setShowDropdownProfile] = useState(false);
-  
+
   // Menu and Hadiah active
   const [activeMenu, setActiveMenu] = useState("hadiah");
+
+  // Awal useEffect khusus Streamer
 
   useEffect(() => {
     dispatch(fetchStreamerData(username));
@@ -44,16 +57,37 @@ export default function DonationPage() {
     }
   }, [errorStreamer]);
 
-  if (loadingStreamer || !dataStreamer?.streamer) {
-    return <LoadingSkeleton />;
-  }
+  // Akhir useEffect khusus Streamer
+
+  // Awal useEffect khusus User
+  useEffect(() => {
+    if (errorUser) {
+      toast.error(errorUser);
+    }
+  }, [errorUser]);
+
+  // Cek jika ada access_token di localStorage untuk fetch data user
+  useEffect(() => {
+    if (localStorage.access_token) {
+      dispatch(fetchUserData());
+    } else {
+      console.log("Tidak ada access_token, user tidak login");
+    }
+  }, [dispatch]);
+
+  // Akhir useEffect khusus User
 
   let socialLinks = dataStreamer?.streamer?.socialMediaLinks || {};
-
+  const isLoggedIn = Boolean(dataUser);
   const menuComponents = {
-    hadiah: <MenuHadiah dataStreamer={dataStreamer} />,
+    hadiah: <MenuHadiah dataStreamer={dataStreamer} dataUser={dataUser} />,
     soundboard: <MenuSoundboard />,
   };
+
+  function handleLogout() {
+    dispatch(doLogout());
+    window.location.reload();
+  }
 
   const metadata = {
     title: `Dukung ${username.toUpperCase()} | SBUBU`,
@@ -61,6 +95,10 @@ export default function DonationPage() {
     keywords: `donate, streamer support, SBUBU donations, support content creators`,
     ogType: `website`,
   };
+
+  if (loadingStreamer || !dataStreamer?.streamer || loadingUser) {
+    return <LoadingSkeleton />;
+  }
   return (
     <>
       <GenerateMetadata data={metadata} />
@@ -80,23 +118,43 @@ export default function DonationPage() {
             {/* Akhir Logo */}
 
             {/* Awal To Profile */}
-            <div className="bg-gray-800 w-fit  h-fit flex justify-between items-center gap-1  p-3 rounded-xl cursor-pointer hover:bg-gray-700 transition-all duration-300 overflow-hidden">
-              <div className="w-10 h-7 relative overflow-hidden rounded-full shrink-0">
-                <img
-                  src={`${dataStreamer?.streamer?.avatarUrl}`}
-                  alt={`Foto ${username}`}
-                  className="absolute w-full h-full object-cover "
-                />
+            {isLoggedIn ? (
+              <div className="flex justify-center items-center gap-4">
+                {/* tES lOGOUT */}
+                <div
+                  onClick={handleLogout}
+                  className="bg-red-600 p-4 rounded-md hover:bg-red-900 transition-all duration-300"
+                >
+                  Logout
+                </div>
+                {/* tES lOGOUT */}
+
+                <div className="bg-gray-800 w-fit  h-fit flex justify-between items-center gap-1  p-3 rounded-xl cursor-pointer hover:bg-gray-700 transition-all duration-300 overflow-hidden">
+                  <div className="w-10 h-7 relative overflow-hidden rounded-full shrink-0">
+                    <img
+                      src={dataUser?.avatarUrl}
+                      alt={`Foto ${dataUser?.username}`}
+                      className="absolute w-full h-full object-cover "
+                    />
+                  </div>
+                  <div className=" whitespace-nowrap">{dataUser?.username}</div>
+                  <div className=" w-full h-full flex justify-center  items-center">
+                    {showDropdownProfile ? (
+                      <IoIosArrowUp className="text-sm" />
+                    ) : (
+                      <IoIosArrowDown className="text-sm" />
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className=" whitespace-nowrap">{username}</div>
-              <div className=" w-full h-full flex justify-center  items-center">
-                {showDropdownProfile ? (
-                  <IoIosArrowUp className="text-sm" />
-                ) : (
-                  <IoIosArrowDown className="text-sm" />
-                )}
-              </div>
-            </div>
+            ) : (
+              <Link
+                className="bg-pink-700 py-2 px-4 rounded-md hover:bg-pink-900 transition-all duration-300"
+                to={"/auth/login"}
+              >
+                Masuk
+              </Link>
+            )}
             {/* Akhir To Profile */}
           </div>
           {/* Akhir Logo dan To Profile */}

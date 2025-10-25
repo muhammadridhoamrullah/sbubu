@@ -137,7 +137,31 @@ class UserController {
 
       sendLoginNotificationEmail(dataLogin);
 
-      res.status(200).json({ access_token });
+      res.status(200).json({
+        access_token,
+        username: findUser.username,
+        email: findUser.email,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getMyProfile(req, res, next) {
+    try {
+      const userId = req.user.id;
+
+      const findUser = await User.findByPk(userId, {
+        attributes: {
+          exclude: ["password"],
+        },
+      });
+
+      if (!findUser) throw { name: "USER_NOT_FOUND" };
+
+      res.status(200).json({
+        user: findUser,
+      });
     } catch (error) {
       next(error);
     }
@@ -155,6 +179,7 @@ module.exports = UserController;
 // USER_LOGIN_VALIDATION
 // USER_LOGIN_EMAIL_PASSWORD_INVALID
 // USER_LOGIN_EMAIL_NOT_VERIFIED
+// USER_NOT_FOUND
 
 // name: {
 //         type: DataTypes.STRING,

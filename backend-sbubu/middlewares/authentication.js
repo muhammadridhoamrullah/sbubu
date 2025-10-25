@@ -17,6 +17,8 @@ async function authentication(req, res, next) {
     // verifikasi token
     const payload = verifyToken(token);
 
+    
+
     // cek apakah user ada di database
     let user = await User.findByPk(payload.id);
 

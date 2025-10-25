@@ -103,6 +103,13 @@ export default function Register() {
 
     return () => clearTimeout(delay);
   }, [confirmPassword, formRegister.password]);
+
+  // Reset state when component unmounts
+  useEffect(() => {
+    console.log("Reset REGISTER Jalan");
+
+    dispatch(registerReset());
+  }, [dispatch]);
   return (
     <>
       <GenerateMetadata data={metadata} />

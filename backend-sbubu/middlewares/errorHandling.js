@@ -37,6 +37,10 @@ async function errorHandler(err, req, res, next) {
     res.status(404).json({ message: "Donation not found" });
   } else if (err.name === "UNAUTHORIZED") {
     res.status(401).json({ message: "Unauthorized" });
+  } else if (err.name === "USER_NOT_FOUND") {
+    res.status(404).json({ message: "User not found" });
+  } else if (err.name === "jwt malformed" || err.name === "JsonWebTokenError") {
+    res.status(401).json({ message: "Invalid token" });
   }
 }
 

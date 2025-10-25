@@ -14,7 +14,7 @@ export const loginSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    loginSucess: (state, action) => {
+    loginSuccess: (state, action) => {
       state.loading = false;
       state.data = action.payload;
       state.isLoggedIn = true;
@@ -24,10 +24,26 @@ export const loginSlice = createSlice({
       state.error = action.payload;
       state.isLoggedIn = false;
     },
+    logout: (state) => {
+      state.data = null;
+      state.isLoggedIn = false;
+      state.loading = false;
+      state.error = null;
+    },
+    resetStateAfterLogin: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 
-export const { loginRequest, loginSucess, loginError } = loginSlice.actions;
+export const {
+  loginRequest,
+  loginSuccess,
+  loginError,
+  logout,
+  resetStateAfterLogin,
+} = loginSlice.actions;
 
 export function doLogin(formData) {
   return async (dispatch) => {
@@ -40,10 +56,17 @@ export function doLogin(formData) {
 
       localStorage.access_token = response.data.access_token;
 
-      dispatch(loginSucess(response.data));
+      dispatch(loginSuccess(response.data));
     } catch (error) {
       dispatch(loginError(error.response.data.message || "Login failed"));
     }
+  };
+}
+
+export function doLogout() {
+  return (dispatch) => {
+    localStorage.removeItem("access_token");
+    dispatch(logout());
   };
 }
 

@@ -3,7 +3,7 @@ import GenerateMetadata from "../../components/GenerateMetadata";
 import { VscLoading } from "react-icons/vsc";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { doLogin } from "../../store/loginSlice";
+import { doLogin, resetStateAfterLogin } from "../../store/loginSlice";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
@@ -12,6 +12,7 @@ export default function Login() {
   const { loading, data, error, isLoggedIn } = useSelector(
     (state) => state.login
   );
+
   const navigate = useNavigate();
   const metadata = {
     title: "Login - SBUBU",
@@ -57,6 +58,12 @@ export default function Login() {
       navigate("/me");
     }
   }, [isLoggedIn, navigate]);
+
+  useEffect(() => {
+    console.log("Reset LOGIN Jalan");
+
+    dispatch(resetStateAfterLogin());
+  }, [dispatch]);
 
   return (
     <>

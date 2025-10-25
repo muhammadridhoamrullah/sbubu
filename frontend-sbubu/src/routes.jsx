@@ -12,7 +12,9 @@ import Transaction from "./pages/(Non-Auth)/Transaction";
 
 function checkLogin() {
   if (!localStorage.access_token) {
+    // window.location.href = "/auth/login";
     return redirect("/auth/login");
+    // return null;
   }
 
   return null;
@@ -20,7 +22,7 @@ function checkLogin() {
 
 function preventAuthAccess() {
   if (localStorage.access_token) {
-    return redirect("/c/me");
+    return redirect("/me");
   }
   return null;
 }
