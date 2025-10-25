@@ -89,38 +89,89 @@ export default function MenuHadiah({ dataStreamer }) {
       window.snap.pay(data?.midtransToken, {
         onSuccess: async function (result) {
           // Hit API midtrans-webhook untuk update status pembayaran
-          const response = await instance.post("/donation/midtrans-webhook", {
-            order_id: result.order_id,
-            transaction_status: result.transaction_status,
-            fraud_status: result.fraud_status,
-            data: result,
-          });
+          try {
+            const response = await instance.post("/donation/midtrans-webhook", {
+              order_id: result.order_id,
+              transaction_status: result.transaction_status,
+              fraud_status: result.fraud_status,
+              data: result,
+            });
 
-          // Payment Type, transaction_time, gross_amount, transaction_status, order_id
-          const paymentData = {
-            order_id: result.order_id,
-            payment_type: result.payment_type,
-            transaction_time: result.transaction_time,
-            gross_amount: result.gross_amount,
-            transaction_status: result.transaction_status,
-          };
+            toast.success("Pembayaran berhasil dilakukan.");
+            await new Promise((resolve) => setTimeout(resolve, 3000));
 
-          navigate(`/transaction/${result.order_id}`);
+            navigate(`/transaction/${result.order_id}`);
+          } catch (error) {
+            if (error.response) {
+              const message =
+                error.response.data?.message || "Gagal memproses pembayaran";
+              toast.error(message);
+            } else if (error.request) {
+              toast.error("Tidak ada respon dari server. Silakan coba lagi.");
+            } else {
+              toast.error("Terjadi kesalahan saat memproses pembayaran.");
+            }
+          }
         },
         onPending: async function (result) {
-          /* You may add your own implementation here */
-          alert("wating your payment!");
-          console.log(result, "ini pending");
-          navigate(`/transaction/${result.order_id}`);
+          // HIT API midtrans-webhook untuk update status pembayaran
+          try {
+            const response = await instance.post("/donation/midtrans-webhook", {
+              order_id: result.order_id,
+              transaction_status: result.transaction_status,
+              fraud_status: result.fraud_status,
+              data: result,
+            });
+
+            toast(
+              "Menunggu pembayaran Anda diselesaikan. Akan diarahkan ke halaman detail transaksi.",
+              {
+                icon: "⏳",
+              }
+            );
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+
+            navigate(`/transaction/${result.order_id}`);
+          } catch (error) {
+            if (error.response) {
+              const message =
+                error.response.data?.message || "Gagal memproses pembayaran";
+              toast.error(message);
+            } else if (error.request) {
+              toast.error("Tidak ada respon dari server. Silakan coba lagi.");
+            } else {
+              toast.error("Terjadi kesalahan saat memproses pembayaran.");
+            }
+          }
         },
         onError: async function (result) {
-          /* You may add your own implementation here */
-          alert("payment failed!");
-          console.log(result);
+          toast.error(
+            "Terjadi kesalahan pada pembayaran Anda. Silakan coba lagi."
+          );
+
+          try {
+            const response = await instance.post("/donation/midtrans-webhook", {
+              order_id: result.order_id,
+              transaction_status: result.transaction_status,
+              fraud_status: result.fraud_status,
+              data: result,
+            });
+          } catch (error) {
+            if (error.response) {
+              const message =
+                error.response.data?.message || "Gagal memproses pembayaran";
+              toast.error(message);
+            } else if (error.request) {
+              toast.error("Tidak ada respon dari server. Silakan coba lagi.");
+            } else {
+              toast.error("Terjadi kesalahan saat memproses pembayaran.");
+            }
+          }
+
+          navigate(`/transaction/${result.order_id}`);
         },
         onClose: async function () {
-          /* You may add your own implementation here */
-          alert("you closed the popup without finishing the payment");
+          toast.error("Anda menutup popup pembayaran tanpa menyelesaikannya.");
         },
       });
     }

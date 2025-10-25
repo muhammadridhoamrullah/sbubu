@@ -32,6 +32,9 @@ export function fetchStreamerData(username) {
     try {
       dispatch(streamerRequest());
 
+      // simulasi loading 10 detik
+      // await new Promise((resolve) => setTimeout(resolve, 10000));
+
       const response = await instance.get(`/donation/${username}`);
 
       dispatch(streamerSuccess(response.data));

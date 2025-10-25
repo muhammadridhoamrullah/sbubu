@@ -208,9 +208,15 @@ class DonationController {
       // cari streamer berdasarkan username
       let streamer = await User.findOne({
         where: { username },
-        attributes: {
-          exclude: ["password"],
-        },
+        attributes: [
+          "id",
+          "username",
+          "name",
+          "banner",
+          "isEmailVerified",
+          "socialMediaLinks",
+          "avatarUrl",
+        ],
       });
 
       if (!streamer) {
@@ -218,27 +224,27 @@ class DonationController {
       }
 
       // ambil recent donation yang success untuk streamer tersebut
-      let recentDonations = await Donation.findAll({
-        where: {
-          UserId: streamer.id,
-          status: "success",
-        },
-        order: [["createdAt", "DESC"]],
-        limit: 10,
-        attributes: ["donorName", "amount", "message", "createdAt"],
-      });
+      // let recentDonations = await Donation.findAll({
+      //   where: {
+      //     UserId: streamer.id,
+      //     status: "success",
+      //   },
+      //   order: [["createdAt", "DESC"]],
+      //   limit: 10,
+      //   attributes: ["donorName", "amount", "message", "createdAt"],
+      // });
 
-      let totalEarnings = await Donation.sum("amount", {
-        where: {
-          UserId: streamer.id,
-          status: "success",
-        },
-      });
+      // let totalEarnings = await Donation.sum("amount", {
+      //   where: {
+      //     UserId: streamer.id,
+      //     status: "success",
+      //   },
+      // });
 
       res.status(200).json({
         streamer,
-        totalEarnings: totalEarnings || 0,
-        recentDonations,
+        // totalEarnings: totalEarnings || 0,
+        // recentDonations,
       });
     } catch (error) {
       console.log(error, "<<< error getStreamerDonations");

@@ -30,6 +30,7 @@ export default function DonationPage() {
   } = useSelector((state) => state.streamer);
 
   const [showDropdownProfile, setShowDropdownProfile] = useState(false);
+  
   // Menu and Hadiah active
   const [activeMenu, setActiveMenu] = useState("hadiah");
 
