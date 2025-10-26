@@ -25,11 +25,21 @@ export const pembayaranSlice = createSlice({
       state.error = action.payload;
       state.isCompleted = false;
     },
+    resetPembayaran: (state) => {
+      state.data = null;
+      state.loading = false;
+      state.error = null;
+      state.isCompleted = false;
+    },
   },
 });
 
-export const { pembayaranRequest, pembayaranSuccess, pembayaranError } =
-  pembayaranSlice.actions;
+export const {
+  pembayaranRequest,
+  pembayaranSuccess,
+  pembayaranError,
+  resetPembayaran,
+} = pembayaranSlice.actions;
 
 export function lakukanPembayaran(dataPembayaran, username) {
   return async (dispatch) => {

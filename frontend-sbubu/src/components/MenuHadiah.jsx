@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatRupiah } from "./Helpers";
 import { useDispatch, useSelector } from "react-redux";
-import { lakukanPembayaran } from "../store/pembayaranSlice";
+import { lakukanPembayaran, resetPembayaran } from "../store/pembayaranSlice";
 import { AiOutlineLoading } from "react-icons/ai";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,6 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
 
   const [hideFromCreator, setHideFromCreator] = useState(false);
   const [awalDikirimSebagai, setAwalDikirimSebagai] = useState(true);
-  console.log(awalDikirimSebagai, "awal");
 
   const [formDonation, setFormDonation] = useState({
     donorName: dataUser && awalDikirimSebagai ? dataUser?.username : "",
@@ -81,6 +80,13 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
 
     dispatch(lakukanPembayaran(payload, username));
   }
+
+  // Reset pembayaran state ketika komponen di mount
+  useEffect(() => {
+    return () => {
+      dispatch(resetPembayaran());
+    };
+  }, [dispatch]);
 
   // memunculkan window snap pay
   useEffect(() => {
