@@ -262,6 +262,8 @@ class DonationController {
       let donations = await Donation.findAll({
         where: { UserId },
         order: [["createdAt", "DESC"]],
+        status: "success",
+        limit: 10,
       });
 
       const stats = {
