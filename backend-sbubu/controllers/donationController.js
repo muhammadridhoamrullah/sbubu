@@ -202,18 +202,17 @@ class DonationController {
         };
 
         // Emit ke room streamer
-        io.to(`streamer-${donation.Recipient.username}`).emit(
+        // io.to(`streamer-${donation.Recipient.username}`).emit(
+        //   "new-donation",
+        //   alertData
+        // );
+
+        // 1. Kirim ke room overlay key yang sesuai dengan donation ini dengan nama event "new-donation"
+        // yang akan diterima oleh client  adalah event "new-donation"
+        io.to(`overlay-${donation.Recipient.overlayKey}`).emit(
           "new-donation",
           alertData
         );
-
-        // Emit ke room overlay key (nanti overlay key ini di-generate di frontend streamer)
-        if (donation.Recipient && donation.Recipient.overlayKey) {
-          io.to(`overlay-${donation.Recipient.overlayKey}`).emit(
-            "new-donation",
-            alertData
-          );
-        }
 
         console.log(
           `Donation ${order_id} SUCCESS! Alert emitted to streamer ${donation.UserId}`

@@ -38,20 +38,18 @@ app.use(
 
 // Socket.io Connection Handling
 io.on("connection", (socket) => {
-  console.log("Client Connected", socket.id);
+  // 1. Connnect event
+  console.log("Ada yang mau connect nih useEffect widget", socket.id);
 
   // Event: Streamer join room (untuk listen donation alert)
-  socket.on("join-streamer-room", (streamerUsername) => {
-    socket.join(`streamer-${streamerUsername}`);
-    console.log(`Socket ${socket.id} joined room: ${streamerUsername}`);
-  });
+  // socket.on("join-streamer-room", (streamerUsername) => {
+  //   socket.join(`streamer-${streamerUsername}`);
+  // });
 
-  // Event: Join by overlay key (alternative method)
+  // 2. Dengerin event "join-by-overlay-key" dari widget / client
   socket.on("join-by-overlay-key", (overlayKey) => {
+    // 3. Masukin client ke room overlay key
     socket.join(`overlay-${overlayKey}`);
-    console.log(
-      `Socket ${socket.id} joined room by overlay key: ${overlayKey}`
-    );
   });
 
   // Event: Disconnect
