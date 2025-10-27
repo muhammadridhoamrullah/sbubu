@@ -6,12 +6,13 @@ import { fetchUserDonationData } from "../../../store/userSlice";
 import toast from "react-hot-toast";
 import { formatRupiah } from "../../../components/Helpers";
 
-export default function KotakHadiah({ data }) {
+export default function KotakHadiah({ data, onNavigateToWithdrawal }) {
   const dispatch = useDispatch();
   const [sembunyikan, setSembunyikan] = useState(true);
   const { dataDonation, loadingDonation, errorDonation } = useSelector(
     (state) => state.user
   );
+  console.log(dataDonation, "<< dataDonation KotakHadiah");
 
   useEffect(() => {
     dispatch(fetchUserDonationData());
@@ -66,11 +67,25 @@ export default function KotakHadiah({ data }) {
           </div>
           {/* Akhir Total Dukungan */}
           {/* Awal Jumlah */}
-          <div className="text-2xl font-bold">
+          <div
+            className={`${
+              sembunyikan ? "blur-md select-none" : ""
+            } text-2xl font-bold transition-all duration-300`}
+          >
             {formatRupiah(dataDonation?.stats?.totalEarnings)}
           </div>
           {/* Akhir Jumlah */}
 
+          {/* Awal Total Donation */}
+          <div
+            className={`${
+              sembunyikan ? "blur-md select-none" : ""
+            }transition-all duration-300 text-sm font-medium text-gray-500`}
+          >
+            Total Donation: {dataDonation?.stats?.totalDonations}
+          </div>
+
+          {/* Akhir Total Donation */}
           {/* Awal Info */}
           <div className=" w-full h-fit text-sm text-gray-600 ">
             Hadiah yang kamu diterima belum dipotong oleh biaya admin. Biaya
@@ -79,7 +94,10 @@ export default function KotakHadiah({ data }) {
           {/* Akhir Info */}
 
           {/* Awal Lakukan Penarikan Dana */}
-          <div className="bg-green-800 px-4 py-2 rounded-md hover:bg-green-950 cursor-pointer transition-all duration-300 text-xl">
+          <div
+            onClick={onNavigateToWithdrawal}
+            className="bg-green-800 px-4 py-2 rounded-md hover:bg-green-950 cursor-pointer transition-all duration-300 text-xl"
+          >
             Lakukan Penarikan Dana
           </div>
           {/* Akhir Lakukan Penarikan Dana */}

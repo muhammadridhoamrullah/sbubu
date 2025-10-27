@@ -3,14 +3,18 @@ import GenerateMetadata from "../../../components/GenerateMetadata";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserData } from "../../../store/userSlice";
 import Halaman from "./Halaman";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Filter from "./Filter";
 import KotakHadiah from "./KotakHadiah";
+import toast from "react-hot-toast";
 
 export default function Creator() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const { username } = useParams();
+  console.log(username, "<< username");
+
   // Ambil data user dari redux
   const {
     data: dataUser,
@@ -19,11 +23,29 @@ export default function Creator() {
   } = useSelector((state) => state.user);
 
   const [activeMenu, setActiveMenu] = useState("halaman");
-  console.log(activeMenu, "<<ini ac tiv emenu");
 
   useEffect(() => {
-    dispatch(fetchUserData());
-  }, [dispatch]);
+    if (!dataUser) {
+      dispatch(fetchUserData());
+    }
+  }, []);
+
+  // Cek jika username di URL tidak sesuai dengan data user, redirect ke halaman yang benar
+  useEffect(() => {
+    if (dataUser && dataUser.username) {
+      if (dataUser.username.toLowerCase() !== username.toLowerCase()) {
+        toast.error("Anda tidak memiliki akses ke halaman kreator ini.");
+        navigate(`/c/${dataUser.username}`);
+      }
+    }
+  }, [dataUser, username, navigate]);
+
+  // Cek jika errorUser ada, tampilkan toast
+  useEffect(() => {
+    if (errorUser) {
+      toast.error(errorUser);
+    }
+  }, [errorUser]);
 
   const menuItems = [
     { name: "halaman", label: "Halaman" },
@@ -38,7 +60,12 @@ export default function Creator() {
   const menuComponents = {
     halaman: <Halaman data={dataUser} />,
     filter: <Filter />,
-    gifts: <KotakHadiah data={dataUser} />,
+    gifts: (
+      <KotakHadiah
+        data={dataUser}
+        onNavigateToWithdrawal={() => setActiveMenu("withdrawal")}
+      />
+    ),
     "overlay-control": <div>Overlay Control Component</div>,
     withdrawal: <div>Withdrawal Component</div>,
     bans: <div>Bans Component</div>,

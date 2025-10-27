@@ -189,7 +189,35 @@ class DonationController {
 
       // TODO later: emit socket.io event to alert widget in streamer page
       if (newStatus === "success") {
-        console.log(`Nanti pake socket.io`);
+        const io = req.app.get("io");
+
+        // Prepare donation data untuk alert
+        const alertData = {
+          id: donation.id,
+          donorName: donation.donorName,
+          amount: donation.amount,
+          message: donation.message,
+          messageType: donation.messageType,
+          createdAt: donation.createdAt,
+        };
+
+        // Emit ke room streamer
+        io.to(`streamer-${donation.Recipient.username}`).emit(
+          "new-donation",
+          alertData
+        );
+
+        // Emit ke room overlay key (nanti overlay key ini di-generate di frontend streamer)
+        if (donation.Recipient && donation.Recipient.overlayKey) {
+          io.to(`overlay-${donation.Recipient.overlayKey}`).emit(
+            "new-donation",
+            alertData
+          );
+        }
+
+        console.log(
+          `Donation ${order_id} SUCCESS! Alert emitted to streamer ${donation.UserId}`
+        );
       }
 
       res.status(200).json({ message: "Webhook handled successfully" });
@@ -263,7 +291,6 @@ class DonationController {
         where: { UserId },
         order: [["createdAt", "DESC"]],
         status: "success",
-        limit: 10,
       });
 
       const stats = {

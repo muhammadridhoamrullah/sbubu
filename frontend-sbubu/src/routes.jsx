@@ -9,6 +9,7 @@ import Personal from "./pages/(Auth)/(me)/Personal";
 import DonationPage from "./pages/(Non-Auth)/DonationPage";
 import SuccessPayment from "./pages/(Non-Auth)/Transaction";
 import Transaction from "./pages/(Non-Auth)/Transaction";
+import AlertWidget from "./pages/(Non-Auth)/AlertWidget";
 
 function checkLogin() {
   if (!localStorage.access_token) {
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
   {
     path: "/transaction/:orderId",
     element: <Transaction />,
+  },
+  {
+    path: "/widget/:overlayKey",
+    element: <AlertWidget />,
   },
   {
     path: "/auth",
