@@ -13,7 +13,6 @@ export default function Creator() {
   const navigate = useNavigate();
   const location = useLocation();
   const { username } = useParams();
-  console.log(username, "<< username");
 
   // Ambil data user dari redux
   const {

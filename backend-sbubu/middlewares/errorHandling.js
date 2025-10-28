@@ -41,6 +41,8 @@ async function errorHandler(err, req, res, next) {
     res.status(404).json({ message: "User not found" });
   } else if (err.name === "jwt malformed" || err.name === "JsonWebTokenError") {
     res.status(401).json({ message: "Invalid token" });
+  } else if (err.name === "BANNED_WORD_VALIDATION") {
+    res.status(400).json({ message: "Banned word cannot be empty" });
   }
 }
 

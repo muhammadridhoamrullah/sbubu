@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const generateOverlayKey = require("../helpers/generateOverlayKey");
 const { signToken, verifyToken } = require("../helpers/jwt");
-const { User } = require("../models/index");
+const { User, BannedWord } = require("../models/index");
 const {
   sendVerificationEmail,
   sendLoginNotificationEmail,
@@ -166,6 +166,30 @@ class UserController {
       next(error);
     }
   }
+
+  static async addBannedWord(req, res, next) {
+    try {
+      const UserId = req.user.id;
+      const { word } = req.body;
+
+      if (!word) {
+        throw { name: "BANNED_WORD_VALIDATION" };
+      }
+
+      const newBanWord = await BannedWord.create({
+        word,
+        isActive: true,
+        UserId,
+      });
+
+      res.status(201).json({
+        message: `Banned word '${newBanWord.word}' has been added successfully.`,
+        bannedWord: newBanWord,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = UserController;
@@ -180,6 +204,7 @@ module.exports = UserController;
 // USER_LOGIN_EMAIL_PASSWORD_INVALID
 // USER_LOGIN_EMAIL_NOT_VERIFIED
 // USER_NOT_FOUND
+// BANNED_WORD_VALIDATION
 
 // name: {
 //         type: DataTypes.STRING,

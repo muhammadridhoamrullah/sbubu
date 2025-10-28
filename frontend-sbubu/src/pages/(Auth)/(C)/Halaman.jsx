@@ -8,6 +8,28 @@ export default function Halaman({ data }) {
   const fileInputProfilRef = useRef(null);
   const fileInputBannerRef = useRef(null);
 
+  // Form
+  const [formData, setFormData] = useState({
+    name: data?.name || "",
+    username: data?.username || "",
+    bio: data?.bio || "",
+    youtube: data?.socialMediaLinks?.youtube || "",
+    instagram: data?.socialMediaLinks?.instagram || "",
+    tiktok: data?.socialMediaLinks?.tiktok || "",
+    twitter: data?.socialMediaLinks?.twitter || "",
+    threads: data?.socialMediaLinks?.threads || "",
+  });
+
+  // Change Handler
+  function changeHandler(e) {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  }
+
   function handleUploadProfilClick() {
     fileInputProfilRef.current.click();
   }
@@ -18,16 +40,83 @@ export default function Halaman({ data }) {
 
   function handleFileChangeProfil(e) {
     const file = e.target.files[0];
+    console.log(file, "< ini file");
+
     if (file) {
+      // Validasi tipe file (hanya gambar)
+      if (!file.type.startsWith(`image/`)) {
+        toast.error("File harus berupa gambar");
+        return;
+      }
+
+      // Validasi ukuran file (maksimal 2MB)
+      const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSizeInBytes) {
+        toast.error("Ukuran file maksimal 2MB");
+        return;
+      }
+
       setSelectedFileProfil(file);
+      toast.success("File foto profil siap diunggah");
     }
   }
 
   function handleFileChangeBanner(e) {
     const file = e.target.files[0];
     if (file) {
+      // Validasi tipe file (hanya gambar)
+      if (!file.type.startsWith(`image/`)) {
+        toast.error("File harus berupa gambar");
+        return;
+      }
+
+      // Validasi ukuran file (maksimal 5MB)
+      const maxSizeInBytes = 5 * 1024 * 1024;
+      if (file.size > maxSizeInBytes) {
+        toast.error("Ukuran file maksimal 5MB");
+        return;
+      }
+
       setSelectedFileBanner(file);
+      toast.success("File banner siap diunggah");
     }
+  }
+
+  async function submitHandler(e) {
+    e.preventDefault();
+
+    // Nanti
+    // const submitData = new FormData();
+    // // Tambahkan text data
+    // Object.keys(formData).forEach((key) => {
+    //   submitData.append(key, formData[key]);
+    // });
+
+    // // Tambahkan file jika ada
+    // if (selectedFileProfil) {
+    //   submitData.append("fotoProfil", selectedFileProfil);
+    // }
+
+    // if (selectedFileBanner) {
+    //   submitData.append("fotoBanner", selectedFileBanner);
+    // }
+
+    // try {
+    //   const response = await fetch("/api/update-profile", {
+    //     method: "POST",
+    //     body: submitData,
+    //     // Jangan set Content-Type, biar browser yang set otomatis untuk multipart/form-data
+    //   });
+
+    //   if (response.ok) {
+    //     toast.success("Profil berhasil diperbarui");
+    //   } else {
+    //     toast.error("Gagal memperbarui profil");
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    //   toast.error("Terjadi kesalahan");
+    // }
   }
 
   //   fungsi untuk menyalin link halaman
@@ -50,8 +139,15 @@ export default function Halaman({ data }) {
     const link = `http://localhost:5173/${data?.username}`;
     window.open(link, "_blank");
   }
+
+  async function handleClickDelete() {
+    console.log(`Delete`);
+  }
   return (
-    <div className="w-full h-fit flex flex-col gap-3 justify-start items-start">
+    <form
+      onSubmit={submitHandler}
+      className="w-full h-fit flex flex-col gap-3 justify-start items-start"
+    >
       {/* Awal Halaman */}
       <div className="bg-black/70 w-full h-fit flex flex-col justify-start items-start rounded-xl overflow-hidden ">
         {/* Awal Judul Halaman */}
@@ -108,7 +204,11 @@ export default function Halaman({ data }) {
             {/* Awal Foto */}
             <div className=" w-1/3 h-full relative overflow-hidden rounded-md">
               <img
-                src={data?.avatarUrl || "/default-avatar.png"}
+                src={
+                  selectedFileProfil
+                    ? URL.createObjectURL(selectedFileProfil)
+                    : data?.avatarUrl || "/defaultProfile.jpg"
+                }
                 alt={`Foto ${data?.username}`}
                 className="absolute w-full h-full object-cover"
               />
@@ -148,6 +248,10 @@ export default function Halaman({ data }) {
                 </button>
               </div>
               {/* Akhir Unggah */}
+
+              {/* Awal Info Ukuran */}
+              <div className="text-xs text-gray-500 italic">Maksimal 2MB.</div>
+              {/* Akhir Info Ukuran */}
             </div>
             {/* Akhir Unggah */}
           </div>
@@ -158,8 +262,10 @@ export default function Halaman({ data }) {
             <div className="w-1/3 h-full relative overflow-hidden rounded-md">
               <img
                 src={
-                  `http://localhost:3000${data?.banner}` ||
-                  "/defaultBanner2.jpg"
+                  selectedFileBanner
+                    ? URL.createObjectURL(selectedFileBanner)
+                    : `http://localhost:3000/${data?.bannerUrl}` ||
+                      "/defaultBanner.jpg"
                 }
                 alt={`Banner ${data?.username}`}
                 className="absolute w-full h-full object-cover"
@@ -208,6 +314,10 @@ export default function Halaman({ data }) {
                 {/* Akhir Button Unggah */}
               </div>
               {/* Akhir Unggah Foto Banner */}
+
+              {/* Awal Info Ukuran */}
+              <div className="text-xs text-gray-500 italic">Maksimal 5MB.</div>
+              {/* Akhir Info Ukuran */}
             </div>
             {/* Akhir Unggah Banner */}
           </div>
@@ -228,6 +338,8 @@ export default function Halaman({ data }) {
                 id="name"
                 className="bg-[#1A2B32] w-full h-fit p-2 outline-none rounded-md placeholder:text-gray-500"
                 placeholder="Dewa Beras Gerlong"
+                value={formData.name}
+                onChange={changeHandler}
               />
               {/* Akhir Input Nama */}
             </div>
@@ -245,6 +357,8 @@ export default function Halaman({ data }) {
                 id="username"
                 className="bg-[#1A2B32] w-full h-fit p-2 outline-none rounded-md placeholder:text-gray-500"
                 placeholder="dewaberasgerlong"
+                value={formData.username}
+                onChange={changeHandler}
               />
               {/* Akhir Input Username */}
 
@@ -267,6 +381,8 @@ export default function Halaman({ data }) {
               placeholder="Ceritakan singkat tentang diri kamu"
               className="bg-[#1A2B32] w-full h-28 p-2 placeholder:text-gray-500 outline-none rounded-md resize-none"
               maxLength={500}
+              value={formData.bio}
+              onChange={changeHandler}
             />
           </div>
           {/* Akhir Bio */}
@@ -297,6 +413,8 @@ export default function Halaman({ data }) {
               id="youtube"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
               placeholder="https://www.youtube.com/channel/UCy3zgWom-5AGypGX_FVTKpg"
+              value={formData.youtube}
+              onChange={changeHandler}
             />
             {/* Akhir Input Youtube */}
           </div>
@@ -315,6 +433,8 @@ export default function Halaman({ data }) {
               id="instagram"
               placeholder="https://www.instagram.com/oliviarodrigo/?hl=en"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
+              value={formData.instagram}
+              onChange={changeHandler}
             />
             {/* Akhir Input Instagram */}
           </div>
@@ -333,6 +453,8 @@ export default function Halaman({ data }) {
               id="tiktok"
               placeholder="https://www.tiktok.com/@livbedumb?lang=en"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
+              value={formData.tiktok}
+              onChange={changeHandler}
             />
             {/* Akhir Input TikTok */}
           </div>
@@ -351,6 +473,8 @@ export default function Halaman({ data }) {
               id="twitter"
               placeholder="https://x.com/oliviarodrigo"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
+              value={formData.twitter}
+              onChange={changeHandler}
             />
             {/* Akhir Input Twitter */}
           </div>
@@ -370,6 +494,8 @@ export default function Halaman({ data }) {
               id="threads"
               placeholder="https://www.threads.com/@oliviarodrigo"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
+              value={formData.threads}
+              onChange={changeHandler}
             />
             {/* Akhir Input Threads */}
           </div>
@@ -378,8 +504,21 @@ export default function Halaman({ data }) {
         {/* Akhir Isi Sosial Media */}
       </div>
       {/* Akhir Sosial Media */}
+
+      {/* Awal Button */}
+      <button
+        type="submit"
+        className="bg-blue-600 w-full h-fit p-4 rounded-md text-xl font-semibold hover:bg-blue-800 transition-all duration-300 cursor-pointer text-center"
+      >
+        SUBMIT
+      </button>
+      {/* Akhir Button */}
+
       {/* Awal Danger */}
-      <div className="bg-black/70 w-full h-fit flex flex-col justify-start items-start rounded-xl overflow-hidden">
+      <div
+        onClick={handleClickDelete}
+        className="bg-black/70 w-full h-fit flex flex-col justify-start items-start rounded-xl overflow-hidden"
+      >
         {/* Awal Judul Danger */}
         <div className="bg-[#1A2B32] w-full h-fit py-1 px-4 text-xl">
           ⛔ Danger ⛔
@@ -390,14 +529,14 @@ export default function Halaman({ data }) {
         <div className="p-4 w-full h-fit flex flex-col gap-2 justify-start items-start">
           {/* Awal Hapus Akun */}
           <div className="bg-red-500 w-full h-fit p-4 text-center hover:bg-red-800 cursor-pointer rounded-xl">
-            Hapus Akun
+            HAPUS AKUN
           </div>
           {/* Akhir Hapus Akun */}
         </div>
         {/* Akhir Isi Danger */}
       </div>
       {/* Akhir Danger */}
-    </div>
+    </form>
   );
 }
 

@@ -1,5 +1,6 @@
 const midtransClient = require("midtrans-client");
 const { User, Donation } = require("../models/index");
+const checkBannedWords = require("../helpers/checkBannedWords");
 class DonationController {
   static async generateMidtransToken(req, res, next) {
     try {
@@ -56,6 +57,31 @@ class DonationController {
         throw { name: "DONATION_CREATE_INPUT_AMOUNT_ERROR" };
       }
 
+      // Check banned words in message
+      let finalMessage = message || "";
+      let isBanned = false;
+      let bannedWordsFound = [];
+
+      // Jika message ada isinya, cek kata terlarang
+      if (message) {
+        const moderationResult = await checkBannedWords(message);
+        console.log(moderationResult, "moderationResult");
+
+        finalMessage = moderationResult.moderateMessage;
+        isBanned = moderationResult.banned;
+        bannedWordsFound = moderationResult.bannedWords;
+
+        if (isBanned) {
+          console.log(
+            `Donation message contains banned words: ${bannedWordsFound.join(
+              ", "
+            )}`
+          );
+        }
+      }
+
+      console.log(finalMessage, "finalMessage");
+
       // Cari streamer berdasarkan username
       let streamer = await User.findOne({
         where: { username },
@@ -101,7 +127,7 @@ class DonationController {
         donorName,
         donorEmail: donorEmail || null,
         amount,
-        message: message || null,
+        message: finalMessage,
         messageType: "text",
         status: "pending",
         midtransToken: midtransToken.token,
@@ -120,6 +146,7 @@ class DonationController {
           OrderId: newDonation.OrderId,
           amount: newDonation.amount,
           donorName: newDonation.donorName,
+          messageBanned: isBanned,
         },
         midtransToken: midtransToken.token,
         midtransRedirectUrl: midtransToken.redirect_url,
