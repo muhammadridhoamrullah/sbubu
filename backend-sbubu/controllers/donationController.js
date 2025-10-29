@@ -61,26 +61,20 @@ class DonationController {
       let finalMessage = message || "";
       let isBanned = false;
       let bannedWordsFound = [];
+      let originalMessage = "";
 
       // Jika message ada isinya, cek kata terlarang
       if (message) {
-        const moderationResult = await checkBannedWords(message);
-        console.log(moderationResult, "moderationResult");
+        const result = await checkBannedWords(message);
 
-        finalMessage = moderationResult.moderateMessage;
-        isBanned = moderationResult.banned;
-        bannedWordsFound = moderationResult.bannedWords;
+        finalMessage = result.finalMessage;
+        isBanned = result.banned;
+        bannedWordsFound = result.bannedWords;
 
         if (isBanned) {
-          console.log(
-            `Donation message contains banned words: ${bannedWordsFound.join(
-              ", "
-            )}`
-          );
+          originalMessage = result.originalMessage;
         }
       }
-
-      console.log(finalMessage, "finalMessage");
 
       // Cari streamer berdasarkan username
       let streamer = await User.findOne({
@@ -128,15 +122,10 @@ class DonationController {
         donorEmail: donorEmail || null,
         amount,
         message: finalMessage,
+        originalMessage: originalMessage || null,
         messageType: "text",
         status: "pending",
         midtransToken: midtransToken.token,
-      });
-      console.log("Berhasil", {
-        id: newDonation.id,
-        OrderId: newDonation.OrderId,
-        amount: newDonation.amount,
-        donorName: newDonation.donorName,
       });
 
       res.status(201).json({
@@ -147,6 +136,9 @@ class DonationController {
           amount: newDonation.amount,
           donorName: newDonation.donorName,
           messageBanned: isBanned,
+          originalMessage: originalMessage,
+          finalMessage: finalMessage,
+          bannedWords: bannedWordsFound,
         },
         midtransToken: midtransToken.token,
         midtransRedirectUrl: midtransToken.redirect_url,
@@ -162,8 +154,6 @@ class DonationController {
     try {
       // ambil data dari midtrans
       const { order_id, transaction_status, fraud_status, data } = req.body;
-
-      console.log("Midtrans webhook", req.body);
 
       // cari donasi berdasarkan order_id
       let donation = await Donation.findOne({

@@ -43,6 +43,28 @@ export default function Filter({ data }) {
     toast.success(`${formData.word} berhasil ditambahkan ke filter kata.`);
   }
 
+  async function submitHandlerTitleMedia(e) {
+    e.preventDefault();
+    dispatch(doFiltering("title", formData.title));
+    setFormData({
+      ...formData,
+      title: "",
+    });
+    toast.success(
+      `${formData.title} berhasil ditambahkan ke filter link media`
+    );
+  }
+
+  async function submitHandlerUrlMedia(e) {
+    e.preventDefault();
+    dispatch(doFiltering("url", formData.url));
+    setFormData({
+      ...formData,
+      url: "",
+    });
+    toast.success(`${formData.url} berhasil ditambahkan ke filter link media.`);
+  }
+
   const metadata = {
     title: `Filter - @${data?.username} | SBUBU`,
     description: "Halaman filter dan moderasi untuk kreator di SBUBU",
@@ -81,7 +103,7 @@ export default function Filter({ data }) {
             {/* Awal Filter Teks */}
             <form
               onSubmit={submitHandlerWord}
-              className="bg-purple-950/50 w-full h-fit flex flex-col gap-1 justify-start items-start"
+              className=" w-full h-fit flex flex-col gap-1 justify-start items-start"
             >
               {/* Awal Judul Filter Teks */}
               <div>Filter Teks</div>
@@ -123,19 +145,41 @@ export default function Filter({ data }) {
             {/* Akhir Filter Teks */}
 
             {/* Awal Filter Judul Video Media */}
-            <form className=" w-full h-fit flex flex-col gap-1 justify-start items-start">
+            <form
+              onSubmit={submitHandlerTitleMedia}
+              className=" w-full h-fit flex flex-col gap-1 justify-start items-start"
+            >
               {/* Awal Judul Filter Video Media */}
               <div>Filter Kata Judul Media </div>
               {/* Akhir Judul Filter Video Media */}
 
               {/* Awal Isi Filter Video Media */}
-              <input
-                type="text"
-                name="videoMedia"
-                id="videoMedia"
-                placeholder="Breastfeeding, Onisen"
-                className="bg-[#1A2B32] w-full h-fit p-2 placeholder:text-gray-500 outline-none rounded-md"
-              />
+              <div className="w-full h-fit flex justify-between items-center gap-4">
+                {/* Awal Input */}
+                <input
+                  type="text"
+                  name="title"
+                  id="title"
+                  placeholder="Breastfeeding, Onisen"
+                  className={`bg-[#1A2B32]  h-fit p-2 placeholder:text-gray-500 outline-none rounded-md ${
+                    formData.title.trim() === "" ? "w-full" : "w-3/4"
+                  } transition-all duration-1000 `}
+                  onChange={changeHandler}
+                  value={formData.title}
+                />
+                {/* Akhir Input */}
+
+                {/* Awal Submit */}
+                <button
+                  type="submit"
+                  className={`bg-blue-600 w-1/4 h-fit p-2 rounded-md hover:bg-blue-700 transition-all duration-1000 cursor-pointer ${
+                    formData.title.trim() === "" ? "hidden" : "block"
+                  }`}
+                >
+                  SUBMIT
+                </button>
+                {/* Akhir Submit */}
+              </div>
               {/* Akhir Isi Filter Video Media */}
 
               {/* Awal Info Filter Video Media */}
@@ -148,19 +192,41 @@ export default function Filter({ data }) {
             {/* Akhir Filter Judul Video Media */}
 
             {/* Awal Filter Link Video Media */}
-            <form className=" w-full h-fit flex flex-col gap-1 justify-start items-start">
+            <form
+              onSubmit={submitHandlerUrlMedia}
+              className=" w-full h-fit flex flex-col gap-1 justify-start items-start"
+            >
               {/* Awal Judul Filter Link Video Media */}
               <div>Filter Link Video Media</div>
               {/* Akhir Judul Filter Link Video Media */}
 
               {/* Awal Isi Filter Link Video Media */}
-              <input
-                type="url"
-                name="urlVideoMedia"
-                id="urlVideoMedia"
-                placeholder="https://www.youtube.com/watch?v=RQBQOE43VYg"
-                className="bg-[#1A2B32] w-full h-fit p-2 placeholder:text-gray-500 outline-none rounded-md"
-              />
+              <div className="w-full h-fit flex justify-between items-center gap-4">
+                {/* Awal Input */}
+                <input
+                  type="url"
+                  name="url"
+                  id="url"
+                  placeholder="https://www.youtube.com/watch?v=RQBQOE43VYg"
+                  className={`bg-[#1A2B32]  h-fit p-2 placeholder:text-gray-500 outline-none rounded-md ${
+                    formData.url.trim() === "" ? "w-full" : "w-3/4"
+                  } transition-all duration-1000 `}
+                  onChange={changeHandler}
+                  value={formData.url}
+                />
+                {/* Akhir Input */}
+
+                {/* Awal Tombol Submit */}
+                <button
+                  type="submit"
+                  className={`bg-blue-600 w-1/4 h-fit p-2 rounded-md hover:bg-blue-700 transition-all duration-1000 cursor-pointer ${
+                    formData.url.trim() === "" ? "hidden" : "block"
+                  }`}
+                >
+                  SUBMIT
+                </button>
+                {/* Akhir Tombol Submit */}
+              </div>
               {/* Akhir Isi Filter Link Video Media */}
 
               {/* Awal Info Filter Link Video Media */}

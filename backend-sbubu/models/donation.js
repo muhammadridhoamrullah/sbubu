@@ -114,6 +114,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+      originalMessage: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      }
     },
     {
       sequelize,
