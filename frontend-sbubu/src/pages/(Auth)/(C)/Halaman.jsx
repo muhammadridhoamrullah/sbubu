@@ -264,8 +264,8 @@ export default function Halaman({ data }) {
                 src={
                   selectedFileBanner
                     ? URL.createObjectURL(selectedFileBanner)
-                    : `http://localhost:3000/${data?.bannerUrl}` ||
-                      "/defaultBanner.jpg"
+                    : `http://localhost:3000/${data?.banner}` ||
+                      "/defaultBanner2.jpg"
                 }
                 alt={`Banner ${data?.username}`}
                 className="absolute w-full h-full object-cover"

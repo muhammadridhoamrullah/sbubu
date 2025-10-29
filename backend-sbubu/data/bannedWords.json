@@ -1,23 +1,50 @@
 [
-  { "word": "anjing", "isActive": true },
-  { "word": "babi", "isActive": true },
-  { "word": "tolol", "isActive": true },
-  { "word": "bodoh", "isActive": true },
-  { "word": "goblok", "isActive": true },
-  { "word": "bangsat", "isActive": true },
-  { "word": "kampret", "isActive": true },
-  { "word": "kontol", "isActive": true },
-  { "word": "memek", "isActive": true },
-  { "word": "ngentot", "isActive": true },
-  { "word": "jancok", "isActive": true },
-  { "word": "asu", "isActive": true },
-
-  { "word": "anj1ng", "isActive": true },
-  { "word": "b4bi", "isActive": true },
-  { "word": "t0l0l", "isActive": true },
-
-  { "word": "klik disini", "isActive": true },
-  { "word": "daftar sekarang", "isActive": true },
-  { "word": "join grup", "isActive": true },
-  { "word": "bonus gratis", "isActive": true }
+  {
+    "type": "word",
+    "value": "anjing"
+  },
+  {
+    "type": "word",
+    "value": "babi"
+  },
+  {
+    "type": "word",
+    "value": "tolol"
+  },
+  {
+    "type": "word",
+    "value": "goblok"
+  },
+  {
+    "type": "word",
+    "value": "bangsat"
+  },
+  {
+    "type": "video",
+    "value": "dQw4w9WgXcQ"
+  },
+  {
+    "type": "video",
+    "value": "ABC123XYZ"
+  },
+  {
+    "type": "domain",
+    "value": "badsite.com"
+  },
+  {
+    "type": "domain",
+    "value": "spam.com"
+  },
+  {
+    "type": "domain",
+    "value": "phishing.net"
+  },
+  {
+    "type": "url",
+    "value": "malware.com/virus.exe"
+  },
+  {
+    "type": "url",
+    "value": "badsite.com/scam"
+  }
 ]

@@ -58,7 +58,7 @@ export default function Creator() {
 
   const menuComponents = {
     halaman: <Halaman data={dataUser} />,
-    filter: <Filter />,
+    filter: <Filter data={dataUser} />,
     gifts: (
       <KotakHadiah
         data={dataUser}
@@ -97,8 +97,9 @@ export default function Creator() {
 
             {/* Awal List Menu Kreator */}
             <div className="w-full h-full flex flex-col gap-2 justify-start items-start p-4">
-              {menuItems.map((menu) => (
+              {menuItems.map((menu, idx) => (
                 <div
+                  key={idx}
                   onClick={() => setActiveMenu(menu.name)}
                   className={`${
                     activeMenu === menu.name ? "bg-pink-700" : "bg-[#1A2B32]"

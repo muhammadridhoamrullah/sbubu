@@ -1,6 +1,6 @@
 const midtransClient = require("midtrans-client");
 const { User, Donation } = require("../models/index");
-const checkBannedWords = require("../helpers/checkBannedWords");
+const { checkBannedWords } = require("../helpers/checkBannedWords");
 class DonationController {
   static async generateMidtransToken(req, res, next) {
     try {

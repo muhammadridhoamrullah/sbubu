@@ -4,6 +4,7 @@ import loginReducer from "./loginSlice";
 import streamerReducer from "./streamerSlice";
 import pembayaranReducer from "./pembayaranSlice";
 import userReducer from "./userSlice";
+import filterReducer from "./filterSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     streamer: streamerReducer,
     pembayaran: pembayaranReducer,
     user: userReducer,
+    filter: filterReducer,
   },
 });

@@ -55,4 +55,9 @@ async function checkBannedWords(inputText) {
   }
 }
 
-module.exports = checkBannedWords;
+function clearCacheBannedWords() {
+  cache = null;
+  cacheTime = null;
+}
+
+module.exports = { checkBannedWords, clearCacheBannedWords };

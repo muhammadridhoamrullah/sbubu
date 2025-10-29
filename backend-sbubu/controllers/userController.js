@@ -7,6 +7,7 @@ const {
   sendLoginNotificationEmail,
 } = require("../services/serviceEmail");
 const { comparePassword } = require("../helpers/bcrypt");
+const { clearCacheBannedWords } = require("../helpers/checkBannedWords");
 class UserController {
   static async register(req, res, next) {
     try {
@@ -170,21 +171,46 @@ class UserController {
   static async addBannedWord(req, res, next) {
     try {
       const UserId = req.user.id;
-      const { word } = req.body;
+      const { type, value } = req.body;
 
-      if (!word) {
+      if (!value) {
+        throw { name: "BANNED_WORD_REQUIRED" };
+      }
+
+      // Split kata-kata berdasarkan koma dan trim spasi
+      const wordsArray = value
+        .split(",")
+        .map((el) => el.trim().toLowerCase())
+        .filter((el) => el.length > 0); // Hapus elemen kosong
+
+      console.log(wordsArray, "<<WordsAerray");
+
+      // Cek jika wordsArray kosong setelah pemrosesan
+      if (wordsArray.length === 0) {
         throw { name: "BANNED_WORD_VALIDATION" };
       }
 
-      const newBanWord = await BannedWord.create({
-        word,
-        isActive: true,
+      // Siapkan data untuk bulkCreate
+
+      const bannedWordsData = wordsArray.map((el) => ({
+        value: el,
+        type,
         UserId,
+      }));
+
+      console.log(bannedWordsData, "<< bannedWordsData");
+
+      // Simpan ke database menggunakan bulkCreate
+      const created = await BannedWord.bulkCreate(bannedWordsData, {
+        ignoreDuplicates: true, // Mengabaikan duplikat berdasarkan constraint unik
       });
 
+      // Clear cache
+      clearCacheBannedWords();
+
       res.status(201).json({
-        message: `Banned word '${newBanWord.word}' has been added successfully.`,
-        bannedWord: newBanWord,
+        message: `${created.length} banned words/url/title added successfully`,
+        value: created.map((el) => el.value),
       });
     } catch (error) {
       next(error);
@@ -204,6 +230,7 @@ module.exports = UserController;
 // USER_LOGIN_EMAIL_PASSWORD_INVALID
 // USER_LOGIN_EMAIL_NOT_VERIFIED
 // USER_NOT_FOUND
+// BANNED_WORD_REQUIRED
 // BANNED_WORD_VALIDATION
 
 // name: {

@@ -9,7 +9,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      word: {
+      type: {
+        type: Sequelize.STRING,
+      },
+      value: {
         type: Sequelize.STRING,
         unique: true,
       },

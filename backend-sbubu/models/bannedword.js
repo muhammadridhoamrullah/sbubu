@@ -16,12 +16,23 @@ module.exports = (sequelize, DataTypes) => {
   }
   BannedWord.init(
     {
-      word: {
+      type: {
         type: DataTypes.STRING,
         allowNull: false,
-
+        validate: {
+          notNull: {
+            msg: "Banned word cannot be null.",
+          },
+          notEmpty: {
+            msg: "Banned word cannot be empty.",
+          },
+        },
+      },
+      value: {
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: {
-          msg: "This word is already in the banned list.",
+          msg: "Banned word must be unique.",
         },
         validate: {
           notNull: {
