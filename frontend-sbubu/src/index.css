@@ -5,3 +5,13 @@
   --font-sans: "Share Tech", ui-sans-serif, system-ui, sans-serif;
   --font-bungee: "Bungee", cursive;
 }
+
+/* Progress bar animation */
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}

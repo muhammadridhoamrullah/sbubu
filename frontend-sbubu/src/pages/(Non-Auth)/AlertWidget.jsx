@@ -6,98 +6,158 @@ import { useParams, useSearchParams } from "react-router-dom";
 import io from "socket.io-client";
 const BACKEND_URL = "http://localhost:3000";
 import confetti from "canvas-confetti";
+import { useRef } from "react";
+import { formatRupiah } from "../../components/Helpers";
 
 export default function AlertWidget() {
   const [searchParams] = useSearchParams();
-  const previewMode = searchParams.get("preview") === "true";
-  // Ambil dari  URL : /widget/:overlayKey
   const { overlayKey } = useParams();
-  console.log("OverlayKey", overlayKey);
 
+  // Ini hanya untuk preview mode
+  const previewMode = searchParams.get("preview") === "true";
+
+  // State
   const [currentAlert, setCurrentAlert] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [queue, setQueue] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [alertDuration, setAlertDuration] = useState(0);
 
+  // Refs
+  const socketRef = useRef(null);
+  const audioRef = useRef(null);
+
+  // message:
+  //   "Semangat terus buat kontennya! Sukses selalu! 🚀, saya akan selalu ada mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu mendukungmu apapun yang terjadi HALA MADIRD!",
   // Dummy data untuk preview
   const dummyDonation = {
     id: 0,
-    donorName: "Preview User",
-    amount: 50000,
-    message: "Ini adalah preview donation alert",
+    donorName: "Muhammad Ridho Amrullah",
+    amount: 1000000,
+    message:
+      "Semangat terus buat kontennya! Sukses selalu! 🚀, saya akan selalu ada mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu ada mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu mendukungmu apapun yang terjadi HALA MADIRD!",
     messageType: "text",
     createdAt: new Date(),
   };
 
-  //   useEffect untuk setup socket.io-client dan listen alert donation baru
+  //   useEffect untuk setup socket.io-client dan simpan ke queue
   useEffect(() => {
-    // if (previewMode) {
-    //   // Jika di preview mode, tampilkan dummy alert
-    //   setCurrentAlert(dummyDonation);
-    //   setIsVisible(true);
-    //   return;
-    // }
-
-    // 1. Buat koneksi (sambungin walkie-talkie)
-    const socket = io(BACKEND_URL, {
+    // 1. Buat koneksi (sambungin walkie-talkie), sambungin ke backend
+    socketRef.current = io(BACKEND_URL, {
       transports: ["websocket", "polling"],
     });
 
-    // 2. Tunggu sampai connect
-    socket.on("connect", () => {
-      /// 3. EMIT: Kirim pesan "join-overlay" ke server
-      socket.emit("join-by-overlay-key", overlayKey);
-      console.log(`Terconnect`);
-
-      // Artinya: "Server, masukin saya ke room overlay-8763c58c..."
+    // 2. Connect kan terhadap socket yang di server
+    socketRef.current.on("connect", () => {
+      // 3. Setelah connect, bilang ke server untuk join room overlay sesuai overlayKey dengan "EMIT"
+      socketRef.current.emit("join-by-overlay-key", overlayKey);
     });
 
-    // 4. LISTEN: Dengerin event "new-donation" dari Controller setelah success bayar
-    socket.on("new-donation", (donation) => {
-      console.log("Siap menunggu donasi");
+    // 4. "On" ini untuk mendengarkan event "new-donation" dari midtrans-webhook dengan menerima data donation
+    socketRef.current.on("new-donation", (donation) => {
+      // 5. Masukkan donation yang baru diterima ke dalam queue
+      setQueue((prevQueue) => {
+        const newQueue = [...prevQueue, donation];
 
-      // set alert data
-      setCurrentAlert(donation);
+        return newQueue;
+      });
+    });
+
+    // 6. Ini untuk mendengarkan event disconnect
+    socketRef.current.on("disconnect", () => {
+      console.log("Disconnected from socket.io server");
+    });
+
+    // 7. Error handling
+    socketRef.current.on("error", (error) => {
+      console.error("Socket.io error:", error);
+    });
+
+    // 8. Cleanup function saat komponen unmount
+    return () => {
+      // socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [overlayKey]);
+
+  // STEP 2: useEffect untuk mainkan alert dari queue
+  useEffect(() => {
+    // Ini untuk preview mode
+
+    // if (previewMode && !isPlaying && !currentAlert) {
+    //   setCurrentAlert(dummyDonation);
+    //   setIsPlaying(true);
+    //   setIsVisible(true);
+    //   setAlertDuration(6000000);
+    //   return;
+    // }
+
+    // 1. Cek jika tidak sedang memutar alert dan ada item di queue
+    if (!isPlaying && queue.length > 0) {
+      // 2. Ambil alert pertama dari queue
+      const nextAlert = queue[0];
+
+      // 3. Set current alert dan mulai mainkan
+      setCurrentAlert(nextAlert);
+      setIsPlaying(true);
+
+      // 4. Hapus alert pertama dari queue
+      setQueue((prevQueue) => prevQueue.slice(1));
+
+      // 5. Tampilkan alert
       setIsVisible(true);
 
-      //   Trigger confetti
+      // 6. Jalankan Confetti
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
       });
 
-      //   Play sound alert
-      const audio = new Audio("/alamakDuitNi.mp3");
+      // 7. Mainkan sound alert
+      if (!audioRef.current) {
+        audioRef.current = new Audio("/alamakDuitNi.mp3");
+      }
 
-      // Sekali aja play
+      // 8. Reset currentTime sebelum play
+      audioRef.current.currentTime = 0;
+      audioRef.current
+        .play()
+        .catch((err) => console.log(`Error play sound:`, err));
 
-      audio.play().catch((err) => console.log(`Error play sound:`, err));
+      // 9. Hitung durasi alert berdasarkan amount
+      const duration = calculateAlertDuration(nextAlert.amount);
+      // 10. Simpan duration ke state untuk sebagai referensi progress bar
+      setAlertDuration(duration);
 
-      //   Semakin besar donasi, semakin lama tampil alert-nya
-
-      //   Auto hide after 10 seconds
+      // 11. Setelah durasi selesai, sembunyikan alert dan reset state
       setTimeout(() => {
         setIsVisible(false);
-        setTimeout(() => setCurrentAlert(null), 500);
-      }, 10000);
-    });
 
-    // Disconnect
-    socket.on("disconnect", () => {
-      console.log(`Disconnected from socket.io`);
-    });
+        // 12. Setelah animasi hilang (500ms), reset currentAlert dan isPlaying
+        setTimeout(() => {
+          setCurrentAlert(null);
+          setIsPlaying(false);
+          setAlertDuration(0);
+        }, 500);
+      }, duration);
+    }
+  }, [isPlaying, queue]);
 
-    // Error handling
-    socket.on("error", (error) => {
-      console.error("Socket.io error:", error);
-    });
+  // Function untuk menghitung durasi alert berdasarkan amount
+  function calculateAlertDuration(amount) {
+    if (amount >= 1000000) return 60000; // 60 seconds for ≥ 1M
+    if (amount >= 500000) return 20000; // 20 seconds for ≥ 500k
+    if (amount >= 100000) return 15000; // 15 seconds for ≥ 100k
+    if (amount >= 50000) return 12000; // 12 seconds for ≥ 50k
+    if (amount >= 10000) return 10000; // 10 seconds for ≥ 10k
+    return 8000; // 8 seconds default
+  }
 
-    // Cleanup on unmount
-    return () => {
-      socket.disconnect();
-    };
-  }, [overlayKey]);
-
-  if (!currentAlert) {
+  // Jika tidaak ada currentAlert dan queue kosong serta bukan previewMode, tampilkan pesan waiting
+  if (!currentAlert && queue.length === 0 && !previewMode) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-transparent text-white">
         <p className="text-sm opacity-50">Waiting for donations...</p>
@@ -107,48 +167,64 @@ export default function AlertWidget() {
 
   return (
     <div className="bg-transparent w-full h-screen overflow-hidden flex justify-center items-center">
-      {/* Alert Container */}
-      <div
-        className={`w-96 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg shadow-2xl p-6 
-          
-            transform transition-all duration-500 ease-in-out relative
-          ${
-            isVisible
-              ? "translate-y-0 opacity-100"
-              : "translate-y-[600px] opacity-0"
-          }
-        `}
-      >
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-2xl">
-            💰
-          </div>
-          <div>
-            <h3 className="font-bold text-xl">New Donation!</h3>
-            <p className="text-sm opacity-90">From {currentAlert.donorName}</p>
-          </div>
-        </div>
-
-        {/* Amount */}
-        <div className="bg-white/20 rounded-lg p-4 mb-4">
-          <p className="text-3xl font-bold text-center">
-            Rp {currentAlert.amount.toLocaleString("id-ID")}
+      {/* ✅ Queue Counter (optional - for debugging) */}
+      {queue.length > 0 && (
+        <div className="absolute top-4 left-4 bg-black/70 text-white px-4 py-2 rounded-lg backdrop-blur-sm z-50">
+          <p className="text-sm font-semibold">
+            📋 Queue: {queue.length} donation{queue.length > 1 ? "s" : ""}{" "}
+            waiting
           </p>
         </div>
+      )}
 
-        {/* Message */}
-        {currentAlert.message && (
-          <div className="bg-white/10 rounded-lg p-4">
-            <p className="text-sm italic">"{currentAlert.message}"</p>
+      {currentAlert && (
+        <>
+          {/* Awal Keseluruhan Alert */}
+          <div
+            className={`bg-transparent w-[500px] h-fit text-white rounded-lg transition-all duration-500 ease-in-out  flex flex-col justify-start items-start relative overflow-hidden ${
+              isVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-[600px] opacity-0"
+            }`}
+          >
+            {/* Awal Nama, Amount */}
+            <div className="p-4 bg-[#B30838] w-fit h-fit flex justify-start items-center gap-2 rounded-tl-lg rounded-tr-4xl font-semibold ">
+              {/* Awal Nama */}
+              <div>{currentAlert.donorName}</div>
+              {/* Akhir Nama */}
+
+              {/* Awal - */}
+              <div> - </div>
+              {/* Akhir - */}
+
+              {/* Awal Amount */}
+              <div className="font-bold text-[#F1CB00] text-lg">
+                {formatRupiah(currentAlert.amount)}
+              </div>
+              {/* Akhir Amount */}
+            </div>
+            {/* Akhir Amount */}
+
+            {/* Awal Message */}
+            <div className="px-4 pb-6 pt-4 bg-[#013A81] w-full h-fit text-white rounded-tr-lg text-justify text-lg font-medium ">
+              {currentAlert?.message}
+            </div>
+            {/* Akhir Message */}
+            {/* Awal Progress Bar */}
+            <div className="bg-[#013A81] w-full h-2 overflow-hidden backdrop-blur-sm relative">
+              <div
+                className={`absoulte h-full bg-[#F1CB00] transition-all`}
+                style={{
+                  animation: `progress ${alertDuration}ms linear forwards`,
+                  boxShadow: "0 0 10px rgba(250, 204, 21, 0.5)",
+                }}
+              ></div>
+            </div>
+            {/* Akhir Progress Bar */}
           </div>
-        )}
-
-        {/* Animation sparkles */}
-        <div className="absolute -top-2 -right-2 text-4xl animate-bounce">
-          ✨
-        </div>
-      </div>
+          {/* Akhir Keseluruhan Alert */}
+        </>
+      )}
     </div>
   );
 }
