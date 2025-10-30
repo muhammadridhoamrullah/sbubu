@@ -7,6 +7,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Filter from "./Filter";
 import KotakHadiah from "./KotakHadiah";
 import toast from "react-hot-toast";
+import OverlayControl from "./OverlayControl";
 
 export default function Creator() {
   const dispatch = useDispatch();
@@ -65,7 +66,7 @@ export default function Creator() {
         onNavigateToWithdrawal={() => setActiveMenu("withdrawal")}
       />
     ),
-    "overlay-control": <div>Overlay Control Component</div>,
+    "overlay-control": <OverlayControl />,
     withdrawal: <div>Withdrawal Component</div>,
     bans: <div>Bans Component</div>,
     integration: <div>Integration Component</div>,

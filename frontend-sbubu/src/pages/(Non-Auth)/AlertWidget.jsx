@@ -7,7 +7,8 @@ import io from "socket.io-client";
 const BACKEND_URL = "http://localhost:3000";
 import confetti from "canvas-confetti";
 import { useRef } from "react";
-import { formatRupiah } from "../../components/Helpers";
+import { formatDate, formatRupiah } from "../../components/Helpers";
+import { MdVerified } from "react-icons/md";
 
 export default function AlertWidget() {
   const [searchParams] = useSearchParams();
@@ -34,8 +35,7 @@ export default function AlertWidget() {
     id: 0,
     donorName: "Muhammad Ridho Amrullah",
     amount: 1000000,
-    message:
-      "Semangat terus buat kontennya! Sukses selalu! 🚀, saya akan selalu ada mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu ada mendukungmu apapun yang terjadi HALA MADIRD!, saya akan selalu mendukungmu apapun yang terjadi HALA MADIRD!",
+    message: "mas",
     messageType: "text",
     createdAt: new Date(),
   };
@@ -90,7 +90,7 @@ export default function AlertWidget() {
     //   setCurrentAlert(dummyDonation);
     //   setIsPlaying(true);
     //   setIsVisible(true);
-    //   setAlertDuration(6000000);
+    //   setAlertDuration(600000);
     //   return;
     // }
 
@@ -181,16 +181,25 @@ export default function AlertWidget() {
         <>
           {/* Awal Keseluruhan Alert */}
           <div
-            className={`bg-transparent w-[500px] h-fit text-white rounded-lg transition-all duration-500 ease-in-out  flex flex-col justify-start items-start relative overflow-hidden ${
+            className={`bg-transparent w-[500px] h-fit text-white  transition-all duration-500 ease-in-out  flex flex-col justify-start items-center relative overflow-hidden gap-2 ${
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "translate-y-[600px] opacity-0"
             }`}
           >
             {/* Awal Nama, Amount */}
-            <div className="p-4 bg-[#B30838] w-fit h-fit flex justify-start items-center gap-2 rounded-tl-lg rounded-tr-4xl font-semibold ">
+            <div className="p-4 bg-[#B30838] w-fit h-fit flex justify-center items-center gap-2  font-semibold rounded-2xl ">
               {/* Awal Nama */}
-              <div>{currentAlert.donorName}</div>
+              {currentAlert.isLogin ? (
+                <div className="flex jusitfy-center items-center gap-1">
+                  {currentAlert.dataUser?.username}
+                  {currentAlert.dataUser?.isEmailVerified && (
+                    <MdVerified className="text-blue-500" title="Verified" />
+                  )}
+                </div>
+              ) : (
+                <div>{currentAlert.donorName}</div>
+              )}
               {/* Akhir Nama */}
 
               {/* Awal - */}
@@ -204,23 +213,31 @@ export default function AlertWidget() {
               {/* Akhir Amount */}
             </div>
             {/* Akhir Amount */}
-
             {/* Awal Message */}
-            <div className="px-4 pb-6 pt-4 bg-[#013A81] w-full h-fit text-white rounded-tr-lg text-justify text-lg font-medium ">
-              {currentAlert?.message}
+            <div className=" bg-[#B30838]  w-full h-fit text-white rounded-2xl text-justify text-lg font-medium flex flex-col overflow-hidden gap-3">
+              {/* Awal Isi Message */}
+              <div className="px-4 pt-4">{currentAlert.message}</div>
+              {/* Akhir Isi Message */}
+
+              {/* Awal Created At */}
+              <div className="px-4 text-sm text-gray-400">
+                {formatDate(currentAlert.createdAt)}
+              </div>
+              {/* Akhir Created At */}
+
+              {/* Awal Progress Bar */}
+              <div className="bg-[#B30838]] w-full h-3 overflow-hidden  relative l">
+                <div
+                  className={`absoulte h-full bg-[#F1CB00] transition-all `}
+                  style={{
+                    animation: `progress ${alertDuration}ms linear forwards`,
+                    boxShadow: "0 0 10px rgba(250, 204, 21, 0.5)",
+                  }}
+                ></div>
+              </div>
+              {/* Akhir Progress Bar */}
             </div>
             {/* Akhir Message */}
-            {/* Awal Progress Bar */}
-            <div className="bg-[#013A81] w-full h-2 overflow-hidden backdrop-blur-sm relative">
-              <div
-                className={`absoulte h-full bg-[#F1CB00] transition-all`}
-                style={{
-                  animation: `progress ${alertDuration}ms linear forwards`,
-                  boxShadow: "0 0 10px rgba(250, 204, 21, 0.5)",
-                }}
-              ></div>
-            </div>
-            {/* Akhir Progress Bar */}
           </div>
           {/* Akhir Keseluruhan Alert */}
         </>

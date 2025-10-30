@@ -20,13 +20,14 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
   const [hideFromCreator, setHideFromCreator] = useState(false);
   const [awalDikirimSebagai, setAwalDikirimSebagai] = useState(true);
 
+  const isLogin = dataUser && awalDikirimSebagai;
+
   const [formDonation, setFormDonation] = useState({
     donorName: dataUser && awalDikirimSebagai ? dataUser?.username : "",
     donorEmail: dataUser && awalDikirimSebagai ? dataUser?.email : "",
     amount: 0,
     message: "",
   });
-  console.log(formDonation, "formD");
 
   //   function changeHandler
   function changeHandler(e) {
@@ -105,6 +106,8 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
               transaction_status: result.transaction_status,
               fraud_status: result.fraud_status,
               data: result,
+              isLogin: isLogin,
+              dataUser: isLogin ? dataUser : null,
             });
 
             toast.success("Pembayaran berhasil dilakukan.");

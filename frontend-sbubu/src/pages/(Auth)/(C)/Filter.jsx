@@ -111,14 +111,14 @@ export default function Filter({ data }) {
 
               {/* Awal Isi Filter Teks */}
               <div className=" w-full h-fit flex jusitfy-between items-center gap-4">
-                <input
+                <textarea
                   type="text"
                   name="word"
                   id="word"
                   placeholder="anjing, babi, setan"
                   onChange={changeHandler}
                   value={formData.word}
-                  className={`bg-[#1A2B32]  h-fit p-2 placeholder:text-gray-500 outline-none rounded-md ${
+                  className={`bg-[#1A2B32] resize-none h-32 p-2 placeholder:text-gray-500 outline-none rounded-md ${
                     formData.word.trim() === "" ? "w-full" : "w-3/4"
                   } transition-all duration-1000 `}
                 />

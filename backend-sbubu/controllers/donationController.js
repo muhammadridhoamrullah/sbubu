@@ -153,7 +153,14 @@ class DonationController {
   static async midtransWebhook(req, res, next) {
     try {
       // ambil data dari midtrans
-      const { order_id, transaction_status, fraud_status, data } = req.body;
+      const {
+        order_id,
+        transaction_status,
+        fraud_status,
+        data,
+        isLogin,
+        dataUser,
+      } = req.body;
 
       // cari donasi berdasarkan order_id
       let donation = await Donation.findOne({
@@ -167,6 +174,8 @@ class DonationController {
           },
         ],
       });
+
+      console.log("Donation Contr", donation);
 
       if (!donation) {
         throw { name: "DONATION_NOT_FOUND" };
@@ -216,6 +225,8 @@ class DonationController {
           message: donation.message,
           messageType: donation.messageType,
           createdAt: donation.createdAt,
+          isLogin,
+          dataUser,
         };
 
         // Emit ke room streamer
