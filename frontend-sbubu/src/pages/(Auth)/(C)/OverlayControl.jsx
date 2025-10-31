@@ -6,8 +6,162 @@ import { RxTextNone } from "react-icons/rx";
 import { IoEyeOffOutline } from "react-icons/io5";
 import { LuRefreshCcw } from "react-icons/lu";
 import { TbDeviceDesktopAnalytics } from "react-icons/tb";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 export default function OverlayControl() {
+  const [copied, setCopied] = useState("");
+
+  const [perintahOverlay, setPerintahOverlay] = useState("");
+
+  const alertThings = [
+    { nama: "Pause", icon: <CiPause1 />, copy: "pause.com", perintah: "pause" },
+    { nama: "Play", icon: <CiPlay1 />, copy: "play.com", perintah: "play" },
+    {
+      nama: "Skip / Next",
+      icon: <IoPlaySkipForwardOutline />,
+      copy: "skip.com",
+      perintah: "skip",
+    },
+    {
+      nama: "Sensor Teks",
+      icon: <RxTextNone />,
+      copy: "sensorteks.com",
+      perintah: "sensorteks",
+    },
+    {
+      nama: "Sensor Media",
+      icon: <IoEyeOffOutline />,
+      copy: "sensormedia.com",
+      perintah: "sensormedia",
+    },
+    {
+      nama: "Refresh",
+      icon: <LuRefreshCcw />,
+      copy: "refresh.com",
+      perintah: "refresh",
+    },
+    {
+      nama: "Tes",
+      icon: <TbDeviceDesktopAnalytics />,
+      copy: "tes.com",
+      perintah: "tes",
+    },
+  ];
+
+  const mediashareThings = [
+    {
+      nama: "Pause",
+      icon: <CiPause1 />,
+      copy: "mediamediapause.com",
+      perintah: "medisharemediasharePause",
+    },
+    {
+      nama: "Play",
+      icon: <CiPlay1 />,
+      copy: "mediaplay.com",
+      perintah: "medishareplay",
+    },
+    {
+      nama: "Skip / Next",
+      icon: <IoPlaySkipForwardOutline />,
+      copy: "mediaskip.com",
+      perintah: "medishareskip",
+    },
+    {
+      nama: "Sensor Teks",
+      icon: <RxTextNone />,
+      copy: "mediasensorteks.com",
+      perintah: "medisharesensorteks",
+    },
+    {
+      nama: "Sensor Media",
+      icon: <IoEyeOffOutline />,
+      copy: "mediasensormedia.com",
+      perintah: "medisharesensormedia",
+    },
+    {
+      nama: "Refresh",
+      icon: <LuRefreshCcw />,
+      copy: "mediarefresh.com",
+      perintah: "medisharerefresh",
+    },
+    {
+      nama: "Tes",
+      icon: <TbDeviceDesktopAnalytics />,
+      copy: "mediates.com",
+      perintah: "medisharetes",
+    },
+  ];
+
+  const soundboardThings = [
+    {
+      nama: "Pause",
+      icon: <CiPause1 />,
+      copy: "soundmediapause.com",
+      perintah: "soundharemediasharePause",
+    },
+    {
+      nama: "Play",
+      icon: <CiPlay1 />,
+      copy: "soundplay.com",
+      perintah: "soundhareplay",
+    },
+    {
+      nama: "Skip / Next",
+      icon: <IoPlaySkipForwardOutline />,
+      copy: "soundskip.com",
+      perintah: "soundhareskip",
+    },
+    {
+      nama: "Refresh",
+      icon: <LuRefreshCcw />,
+      copy: "soundrefresh.com",
+      perintah: "soundharerefresh",
+    },
+    {
+      nama: "Tes",
+      icon: <TbDeviceDesktopAnalytics />,
+      copy: "soundtes.com",
+      perintah: "soundharetes",
+    },
+  ];
+
+  const semuaOverlayThings = [
+    {
+      nama: "Refresh",
+      icon: <LuRefreshCcw />,
+      copy: "semuaOverrefresh.com",
+      perintah: "semuaOverharerefresh",
+    },
+  ];
+
+  function copyToClipboard(things) {
+    try {
+      navigator.clipboard.writeText(things);
+      setCopied(things);
+      toast.success("Berhasil menyalin ke clipboard.");
+      setTimeout(() => {
+        setCopied("");
+      }, 5000);
+    } catch (error) {
+      toast.error("Gagal menyalin ke clipboard.");
+    }
+  }
+
+  function funcPerintahOverlay(things) {
+    try {
+      setPerintahOverlay(things);
+      toast.success(`Perintah ${things} berhasil dikirim ke overlay.`);
+
+      setTimeout(() => {
+        setPerintahOverlay("");
+      }, 5000);
+    } catch (error) {
+      toast.error("Gagal mengirim perintah ke overlay.");
+    }
+  }
+
   return (
     <div className=" w-full h-fit flex flex-col gap-3 justify-start items-start">
       {/* Awal Kontrol Overlay */}
@@ -141,47 +295,41 @@ export default function OverlayControl() {
         {/* Akhir Judul Alert */}
 
         {/* Awal Isi Alert */}
-        <div className="p-4 w-full h-fit flex flex-wrap justify-start items-center gap-2">
-          {/* Awal Pause */}
-          <div className="bg-gray-700 hover:bg-gray-800 w-fit h-fit  flex justify-self-start items-start rounded-full overflow-hidden cursor-pointer transition-all duration-300">
-            {/* Awal Icon Pause */}
-            <div className="w-full h-full flex justify-start items-center gap-1 px-2 py-1">
-              <CiPause1 />
-              <div>Pause</div>
+        <div className=" p-4 w-full h-fit flex flex-wrap justify-start items-center gap-4">
+          {/* Awal Mapping Isi Tindakan Overlay */}
+          {alertThings.map((el, idx) => (
+            <div
+              key={idx}
+              className="bg-gray-700 hover:bg-gray-800 w-fit h-fit flex justify-center items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 "
+            >
+              {/* Awal Tindakan dan Icon */}
+              <div
+                onClick={() => funcPerintahOverlay(el.perintah)}
+                className={`${
+                  perintahOverlay === el.perintah ? "bg-green-700" : ""
+                } w-fit h-full flex justify-start items-center gap-1 px-2 py-1`}
+              >
+                <div>{el.icon}</div>
+                <div>{el.nama}</div>
+              </div>
+              {/* Akhir Tindakan dan Icon */}
+
+              {/* Awal Icon Copy */}
+
+              <div
+                onClick={() => copyToClipboard(el.copy)}
+                className={`${
+                  copied === el.copy
+                    ? "bg-green-700 hover:bg-green-800"
+                    : "bg-gray-900 hover:bg-gray-950"
+                } w-fit h-full px-2 py-1 transition-all duration-300`}
+              >
+                <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
+              </div>
+              {/* Akhir Icon Copy */}
             </div>
-            {/* Akhir Icon Pause */}
-
-            {/* Awal Icon Copy */}
-
-            <div className="bg-gray-900 w-full h-full px-2 py-1 hover:bg-gray-950 cursor-pointer transition-all duration-300 flex justify-center items-center">
-              <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
-            </div>
-            {/* Akhir Icon Copy */}
-          </div>
-          {/* Akhir Pause */}
-
-          {/* Awal Play */}
-          <div className="bg-gray-700 hover:bg-gray-800 w-fit h-fit  flex justify-self-start items-start rounded-full overflow-hidden cursor-pointer transition-all duration-300">
-            {/* Awal Icon Play */}
-            <div className="w-full h-full flex justify-start items-center gap-1 px-2 py-1">
-              <CiPlay1 />
-              <div>Play</div>
-            </div>
-            {/* Akhir Icon Play */}
-
-            {/* Awal Icon Copy */}
-
-            <div className="bg-gray-900 w-full h-full px-2 py-1 hover:bg-gray-950 cursor-pointer transition-all duration-300 flex justify-center items-center">
-              <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
-            </div>
-            {/* Akhir Icon Copy */}
-          </div>
-          {/* Akhir Play */}
-          <div>Skip / Next</div>
-          <div>Sensor Teks</div>
-          <div>Sensor Media</div>
-          <div>Refresh</div>
-          <div>Tes</div>
+          ))}
+          {/* Akhir Mapping Isi Tindakan Overlay */}
         </div>
         {/* Awal Isi Alert */}
       </div>
@@ -196,14 +344,41 @@ export default function OverlayControl() {
         {/* Akhir Judul Mediashare */}
 
         {/* Awal Isi Mediashare */}
-        <div className="bg-pink-800 p-4 w-full h-fit flex flex-wrap justify-start items-center gap-2">
-          <div>Pause</div>
-          <div>Play</div>
-          <div>Skip / Next</div>
-          <div>Sensor Teks</div>
-          <div>Sensor Media</div>
-          <div>Refresh</div>
-          <div>Tes</div>
+        <div className=" p-4 w-full h-fit flex flex-wrap justify-start items-center gap-4">
+          {/* Awal Mapping Isi Tindakan Overlay */}
+          {mediashareThings.map((el, idx) => (
+            <div
+              key={idx}
+              className="bg-gray-700 hover:bg-gray-800 w-fit h-fit flex justify-center items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 "
+            >
+              {/* Awal Tindakan dan Icon */}
+              <div
+                onClick={() => funcPerintahOverlay(el.perintah)}
+                className={`${
+                  perintahOverlay === el.perintah ? "bg-green-700" : ""
+                } w-fit h-full flex justify-start items-center gap-1 px-2 py-1`}
+              >
+                <div>{el.icon}</div>
+                <div>{el.nama}</div>
+              </div>
+              {/* Akhir Tindakan dan Icon */}
+
+              {/* Awal Icon Copy */}
+
+              <div
+                onClick={() => copyToClipboard(el.copy)}
+                className={`${
+                  copied === el.copy
+                    ? "bg-green-700 hover:bg-green-800"
+                    : "bg-gray-900 hover:bg-gray-950"
+                } w-fit h-full px-2 py-1 transition-all duration-300`}
+              >
+                <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
+              </div>
+              {/* Akhir Icon Copy */}
+            </div>
+          ))}
+          {/* Akhir Mapping Isi Tindakan Overlay */}
         </div>
         {/* Awal Isi Mediashare */}
       </div>
@@ -218,12 +393,41 @@ export default function OverlayControl() {
         {/* Akhir Judul Soundboard */}
 
         {/* Awal Isi Soundboard */}
-        <div className="bg-pink-800 p-4 w-full h-fit flex flex-wrap justify-start items-center gap-2">
-          <div>Pause</div>
-          <div>Play</div>
-          <div>Skip / Next</div>
-          <div>Refresh</div>
-          <div>Tes</div>
+        <div className=" p-4 w-full h-fit flex flex-wrap justify-start items-center gap-4">
+          {/* Awal Mapping Isi Tindakan Overlay */}
+          {soundboardThings.map((el, idx) => (
+            <div
+              key={idx}
+              className="bg-gray-700 hover:bg-gray-800 w-fit h-fit flex justify-center items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 "
+            >
+              {/* Awal Tindakan dan Icon */}
+              <div
+                onClick={() => funcPerintahOverlay(el.perintah)}
+                className={`${
+                  perintahOverlay === el.perintah ? "bg-green-700" : ""
+                } w-fit h-full flex justify-start items-center gap-1 px-2 py-1`}
+              >
+                <div>{el.icon}</div>
+                <div>{el.nama}</div>
+              </div>
+              {/* Akhir Tindakan dan Icon */}
+
+              {/* Awal Icon Copy */}
+
+              <div
+                onClick={() => copyToClipboard(el.copy)}
+                className={`${
+                  copied === el.copy
+                    ? "bg-green-700 hover:bg-green-800"
+                    : "bg-gray-900 hover:bg-gray-950"
+                } w-fit h-full px-2 py-1 transition-all duration-300`}
+              >
+                <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
+              </div>
+              {/* Akhir Icon Copy */}
+            </div>
+          ))}
+          {/* Akhir Mapping Isi Tindakan Overlay */}
         </div>
         {/* Awal Isi Soundboard */}
       </div>
@@ -231,19 +435,75 @@ export default function OverlayControl() {
 
       {/* Awal Semua Overlay */}
       <div className="bg-black/70 w-full h-fit flex flex-col justify-start items-start rounded-xl overflow-hidden">
-        {/* Awal Judul Semua Overlay */}
+        {/* Awal Judul Soundboard */}
         <div className="bg-[#1A2B32] w-full h-fit py-1 px-4 text-xl">
           Semua Overlay
         </div>
-        {/* Akhir Judul Semua Overlay */}
+        {/* Akhir Judul Soundboard */}
 
-        {/* Awal Isi Semua Overlay */}
-        <div className="bg-pink-800 p-4 w-full h-fit flex flex-wrap justify-start items-center gap-2">
-          <div>Refresh</div>
+        {/* Awal Isi Soundboard */}
+        <div className=" p-4 w-full h-fit flex flex-wrap justify-start items-center gap-4">
+          {/* Awal Mapping Isi Tindakan Overlay */}
+          {semuaOverlayThings.map((el, idx) => (
+            <div
+              key={idx}
+              className="bg-gray-700 hover:bg-gray-800 w-fit h-fit flex justify-center items-center rounded-full overflow-hidden cursor-pointer transition-all duration-300 "
+            >
+              {/* Awal Tindakan dan Icon */}
+              <div
+                onClick={() => funcPerintahOverlay(el.perintah)}
+                className={`${
+                  perintahOverlay === el.perintah ? "bg-green-700" : ""
+                } w-fit h-full flex justify-start items-center gap-1 px-2 py-1`}
+              >
+                <div>{el.icon}</div>
+                <div>{el.nama}</div>
+              </div>
+              {/* Akhir Tindakan dan Icon */}
+
+              {/* Awal Icon Copy */}
+
+              <div
+                onClick={() => copyToClipboard(el.copy)}
+                className={`${
+                  copied === el.copy
+                    ? "bg-green-700 hover:bg-green-800"
+                    : "bg-gray-900 hover:bg-gray-950"
+                } w-fit h-full px-2 py-1 transition-all duration-300`}
+              >
+                <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
+              </div>
+              {/* Akhir Icon Copy */}
+            </div>
+          ))}
+          {/* Akhir Mapping Isi Tindakan Overlay */}
         </div>
-        {/* Awal Isi Semua Overlay */}
+        {/* Awal Isi Soundboard */}
       </div>
       {/* Akhir Semua Overlay */}
     </div>
   );
 }
+
+// {/* Awal Isi Alert */}
+//       <div className="p-4 w-full h-fit flex flex-wrap justify-start items-center gap-2">
+//         {/* Awal Pause */}
+//         <div className="bg-gray-700 hover:bg-gray-800 w-fit h-fit  flex justify-self-start items-start rounded-full overflow-hidden cursor-pointer transition-all duration-300">
+//           {/* Awal Icon Pause */}
+//           <div className="w-full h-full flex justify-start items-center gap-1 px-2 py-1">
+//             <CiPause1 />
+//             <div>Pause</div>
+//           </div>
+//           {/* Akhir Icon Pause */}
+
+//           {/* Awal Icon Copy */}
+
+//           <div className="bg-gray-900 w-full h-full px-2 py-1 hover:bg-gray-950 cursor-pointer transition-all duration-300 flex justify-center items-center">
+//             <IoCopyOutline className="m-1 text-blue-500 cursor-pointer hover:text-blue-500/50" />
+//           </div>
+//           {/* Akhir Icon Copy */}
+//         </div>
+//         {/* Akhir Pause */}
+
+//       </div>
+//       {/* Awal Isi Alert */}
