@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatRupiah } from "./Helpers";
 import { useDispatch, useSelector } from "react-redux";
 import { lakukanPembayaran, resetPembayaran } from "../store/pembayaranSlice";
@@ -6,6 +6,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import instance from "../axiosInstance";
+import Voicenote from "./Mediashare/Voicenote";
 
 export default function MenuHadiah({ dataStreamer, dataUser }) {
   const username = dataStreamer?.streamer?.username;
@@ -22,12 +23,19 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
 
   const isLogin = dataUser && awalDikirimSebagai;
 
+  // State untuk messageType
+  const [messageType, setMessageType] = useState("text");
+  const [mediaData, setMediaData] = useState(null);
+  console.log(mediaData, "MediaData");
+
   const [formDonation, setFormDonation] = useState({
     donorName: dataUser && awalDikirimSebagai ? dataUser?.username : "",
     donorEmail: dataUser && awalDikirimSebagai ? dataUser?.email : "",
     amount: 0,
     message: "",
   });
+
+  // Check voice note akan avail kalo amount >= 50000
 
   //   function changeHandler
   function changeHandler(e) {
@@ -47,16 +55,6 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
         [name]: value,
       });
     }
-  }
-  let chooseAmount = [
-    5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000,
-  ];
-
-  function handleSelectAmount(amount) {
-    setFormDonation({
-      ...formDonation,
-      amount: amount,
-    });
   }
 
   // async function submitHandler, cek dulu jika hideFromCreator true maka donorName dan donorEmail di set ke "Anonymous" dan "anonymous@gmail.com""
@@ -78,8 +76,59 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       toast.error("Jumlah hadiah minimal adalah IDR 5.000");
       return;
     }
+    // ✅ Validasi spesifik per messageType
+    if (messageType === "text") {
+      // Text mode: tidak perlu validasi media
+      console.log("📝 Text mode - no media required");
+    } else if (messageType === "voice") {
+      if (!mediaData || !mediaData.audioBlob) {
+        toast.error("Silakan rekam pesan suara terlebih dahulu");
+        return;
+      }
+    } else if (messageType === "youtube") {
+      if (!mediaData || !mediaData.mediaUrl) {
+        toast.error("Silakan masukkan URL YouTube");
+        return;
+      }
+    } else if (messageType === "tiktok") {
+      if (!mediaData || !mediaData.mediaUrl) {
+        toast.error("Silakan masukkan URL TikTok");
+        return;
+      }
+    } else if (messageType === "reels") {
+      if (!mediaData || !mediaData.mediaUrl) {
+        toast.error("Silakan masukkan URL Reels");
+        return;
+      }
+    }
 
-    dispatch(lakukanPembayaran(payload, username));
+    // ✅ Create FormData
+    const formData = new FormData();
+    formData.append("donorName", payload.donorName);
+    formData.append("donorEmail", payload.donorEmail);
+    formData.append("amount", payload.amount);
+    formData.append("messageType", messageType);
+
+    console.log("📤 Preparing FormData...");
+    console.log("Message Type:", messageType);
+
+    if (messageType === "text") {
+      formData.append("message", payload.message || "");
+    } else if (messageType === "voice" && mediaData?.audioBlob) {
+      formData.append("voiceFile", mediaData.audioBlob, "voice-message.webm");
+      formData.append("voiceDuration", mediaData.duration);
+    } else if (messageType === "youtube" && mediaData?.youtubeUrl) {
+      formData.append("mediaUrl", mediaData?.mediaUrl);
+      formData.append("mediaTitle", mediaData?.mediaTitle);
+    } else if (messageType === "tiktok" && mediaData?.tiktokUrl) {
+      formData.append("mediaUrl", mediaData?.mediaUrl);
+      formData.append("mediaTitle", mediaData?.mediaTitle);
+    } else if (messageType === "reels" && mediaData?.reelsUrl) {
+      formData.append("mediaUrl", mediaData?.mediaUrl);
+      formData.append("mediaTitle", mediaData?.mediaTitle);
+    }
+
+    dispatch(lakukanPembayaran(formData, username));
   }
 
   // Reset pembayaran state ketika komponen di mount
@@ -205,6 +254,45 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       donorEmail: "",
       amount: formDonation.amount, // Keep amount
       message: formDonation.message, // Keep message
+    });
+  }
+  // Function callback dari child
+  function handleMediaDataChange(data) {
+    setMediaData(data);
+  }
+  const menuMediashare = [
+    { name: "Youtube", type: "youtube" },
+    { name: "Tiktok", type: "tiktok" },
+    { name: "Reels", type: "reels" },
+    { name: "Voice Note", type: "voice" },
+  ];
+
+  const menuMediashareComponents = {
+    youtube: <div>Youtube Component</div>,
+    tiktok: <div>Tiktok Component</div>,
+    reels: <div>Reels Component</div>,
+    voice:
+      formDonation.amount >= 50000 ? (
+        <Voicenote onDataChange={handleMediaDataChange} />
+      ) : (
+        <>
+          <div className="w-full h-fit flex justify-center items-center text-red-500">
+            Membutuhkan minimal Rp 50.000 untuk menggunakan fitur Voice Note.
+          </div>
+        </>
+      ),
+  };
+
+  // Pilihan nominal donation
+  let chooseAmount = [
+    5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000,
+  ];
+
+  // Function untuk memilih nominal donation
+  function handleSelectAmount(amount) {
+    setFormDonation({
+      ...formDonation,
+      amount: amount,
     });
   }
 
@@ -353,6 +441,53 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
           {/* Akhir Input Pesan */}
         </div>
         {/* Akhir Pesan */}
+
+        {/* Awal Garis Pembatas */}
+        <div className="w-full h-0.5 bg-[#1A2B32] my-2"></div>
+        {/* Akhir Garis Pembatas */}
+
+        {/* Awal Mediashare */}
+        <div className="bg-black/70 w-full h-fit flex flex-col justify-start items-start rounded-xl overflow-hidden">
+          {/* Awal Judul Mediashare */}
+          <div className="bg-[#1A2B32] w-full h-fit py-1 px-4 text-xl">
+            Mediashare
+          </div>
+          {/* Akhir Judul Mediashare */}
+
+          {/* Awal Isi Mediashare */}
+          <div className="w-full h-fit flex flex-wrap justify-start items-center gap-2 p-4">
+            {/* Awal Mapping Menu Mediashare */}
+            {menuMediashare.map((el, idx) => {
+              let isActive = messageType === el.type;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() => {
+                    setMessageType(el.type);
+                    setMediaData(null);
+                  }}
+                  className={`${
+                    isActive ? "bg-blue-700" : "bg-[#1A2B32]"
+                  } py-2 px-4 rounded-md hover:bg-blue-700 transition-all duration-300`}
+                >
+                  {el.name}
+                </div>
+              );
+            })}
+            {/* Akhir Mapping Menu Mediashare */}
+          </div>
+
+          {/* Awal Menu Mediashare */}
+
+          <div className=" p-4 w-full h-fit overflow-hidden ">
+            {menuMediashareComponents[messageType]}
+          </div>
+          {/* Akhir Menu Mediashare */}
+
+          {/* Akhir Isi Mediashare */}
+        </div>
+        {/* Akhir Mediashare */}
 
         {/* Awal Garis Pembatas */}
         <div className="w-full h-0.5 bg-[#1A2B32] my-2"></div>

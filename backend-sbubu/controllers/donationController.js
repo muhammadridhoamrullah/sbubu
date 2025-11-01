@@ -45,7 +45,34 @@ class DonationController {
     try {
       // Ambil username
       const { username } = req.params;
-      const { donorName, donorEmail, amount, message } = req.body;
+
+      // ✅ DEBUG: Log entire request
+      console.log("📥 Request details:", {
+        method: req.method,
+        url: req.url,
+        contentType: req.headers["content-type"],
+        hasBody: !!req.body,
+        bodyKeys: req.body ? Object.keys(req.body) : "undefined",
+        hasFile: !!req.file,
+      });
+
+      // ✅ SAFE: Check if req.body exists before destructuring
+      if (!req.body) {
+        console.error("❌ req.body is undefined!");
+        throw {
+          name: "VALIDATION_ERROR",
+          message: "Request body is missing. Check middleware configuration.",
+        };
+      }
+      const {
+        donorName,
+        donorEmail,
+        amount,
+        message,
+        voiceDuration,
+        messageType,
+      } = req.body;
+      console.log(req.body, "di createDon");
 
       // Validasi Input
       if (!donorName || !amount) {
@@ -58,13 +85,26 @@ class DonationController {
       }
 
       // Check banned words in message
+      let voiceUrl = null;
+      let finalVoiceDuration = null;
       let finalMessage = message || "";
       let isBanned = false;
       let bannedWordsFound = [];
       let originalMessage = "";
 
-      // Jika message ada isinya, cek kata terlarang
-      if (message) {
+      if (messageType === "voice" && req.file) {
+        // ✅ Voice message
+        voiceUrl = `/uploads/voices/${req.file.filename}`;
+        finalVoiceDuration = voiceDuration ? parseInt(voiceDuration) : null;
+
+        console.log("🎙️ Voice note uploaded:", {
+          filename: req.file.filename,
+          path: voiceUrl,
+          size: req.file.size,
+          duration: finalVoiceDuration,
+        });
+      } else if (messageType === "text" && message) {
+        // ✅ Text message - check banned words
         const result = await checkBannedWords(message);
 
         finalMessage = result.finalMessage;
@@ -74,8 +114,17 @@ class DonationController {
         if (isBanned) {
           originalMessage = result.originalMessage;
         }
-      }
 
+        console.log("📝 Text message:", {
+          original: message,
+          final: finalMessage,
+          banned: isBanned,
+        });
+      } else if (messageType === "text") {
+        // ✅ Empty text message
+        finalMessage = "";
+        console.log("📝 Empty text message");
+      }
       // Cari streamer berdasarkan username
       let streamer = await User.findOne({
         where: { username },
@@ -123,7 +172,9 @@ class DonationController {
         amount,
         message: finalMessage,
         originalMessage: originalMessage || null,
-        messageType: "text",
+        messageType: messageType || "text", // ✅ Use from request
+        voiceUrl: voiceUrl, // ✅ Add voice URL
+        voiceDuration: finalVoiceDuration, // ✅ Add voice duration
         status: "pending",
         midtransToken: midtransToken.token,
       });
@@ -137,6 +188,9 @@ class DonationController {
           donorName: newDonation.donorName,
           messageBanned: isBanned,
           originalMessage: originalMessage,
+          messageType: messageType || "text", // ✅ Use from request
+          voiceUrl: voiceUrl, // ✅ Add voice URL
+          voiceDuration: finalVoiceDuration,
           finalMessage: finalMessage,
           bannedWords: bannedWordsFound,
         },
@@ -223,7 +277,9 @@ class DonationController {
           donorName: donation.donorName,
           amount: donation.amount,
           message: donation.message,
-          messageType: donation.messageType,
+          messageType: donation.messageType, // ✅ Include messageType
+          voiceUrl: donation.voiceUrl, // ✅ Include voiceUrl
+          voiceDuration: donation.voiceDuration, // ✅ Include voiceDuration
           createdAt: donation.createdAt,
           isLogin,
           dataUser,

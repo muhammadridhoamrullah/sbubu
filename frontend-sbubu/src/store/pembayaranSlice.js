@@ -45,14 +45,22 @@ export function lakukanPembayaran(dataPembayaran, username) {
   return async (dispatch) => {
     try {
       dispatch(pembayaranRequest());
+      console.log(
+        "📤 Sending payment request to:",
+        `/donation/${username}/create`
+      );
+      console.log("📦 FormData type:", dataPembayaran.constructor.name);
 
       const response = await instance.post(
         `/donation/${username}/create`,
         dataPembayaran
       );
+      console.log(response, "res slicePem");
 
       dispatch(pembayaranSuccess(response.data));
     } catch (error) {
+      console.log(error, "error slicePem");
+
       dispatch(
         pembayaranError(
           error.response.data.message ||

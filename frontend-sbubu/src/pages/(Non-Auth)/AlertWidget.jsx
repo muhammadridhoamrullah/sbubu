@@ -9,6 +9,7 @@ import confetti from "canvas-confetti";
 import { useRef } from "react";
 import { formatDate, formatRupiah } from "../../components/Helpers";
 import { MdVerified } from "react-icons/md";
+import { VoiceWaveform } from "../../components/Mediashare/VoiceWaveForm";
 
 export default function AlertWidget() {
   const [searchParams] = useSearchParams();
@@ -116,20 +117,79 @@ export default function AlertWidget() {
         origin: { y: 0.6 },
       });
 
-      // 7. Mainkan sound alert
-      if (!audioRef.current) {
-        audioRef.current = new Audio("/alamakDuitNi.mp3");
+      // Handle audio playback
+      const handleAudioPlayback = async () => {
+        try {
+          if (nextAlert.messageType === "voice" && nextAlert.voiceUrl) {
+            const voiceUrl = `${BACKEND_URL}${nextAlert.voiceUrl}`;
+            console.log("🎙️ Playing voice note:", voiceUrl);
+
+            if (!audioRef.current) {
+              audioRef.current = new Audio(voiceUrl);
+            } else {
+              audioRef.current.src = voiceUrl;
+            }
+
+            audioRef.current.currentTime = 0;
+
+            audioRef.current.onloadeddata = () => {
+              console.log("✅ Voice file loaded successfully");
+            };
+
+            audioRef.current.onerror = (e) => {
+              console.error("❌ Error loading voice file:", e);
+              playDefaultSound();
+            };
+
+            await audioRef.current.play();
+            console.log("▶️ Voice playback started");
+          } else {
+            console.log("🔊 Playing default alert sound for text message");
+            playDefaultSound();
+          }
+        } catch (error) {
+          console.error("❌ Error playing audio:", error);
+          playDefaultSound();
+        }
+      };
+
+      const playDefaultSound = () => {
+        if (!audioRef.current) {
+          audioRef.current = new Audio("/alamakDuitNi.mp3");
+        } else {
+          audioRef.current.src = "/alamakDuitNi.mp3";
+        }
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch((err) => {
+          console.error("Error playing default sound:", err);
+        });
+      };
+
+      handleAudioPlayback();
+
+      // ✅ Calculate duration based on messageType
+      let duration;
+
+      if (nextAlert.messageType === "voice" && nextAlert.voiceDuration) {
+        // ✅ For voice: use voiceDuration + buffer time
+        const voiceDurationMs = nextAlert.voiceDuration * 1000; // Convert to milliseconds
+        const bufferTime = 3000; // 3 seconds buffer for animation
+        duration = voiceDurationMs + bufferTime;
+
+        console.log(
+          `⏱️ Voice duration: ${nextAlert.voiceDuration}s (${voiceDurationMs}ms + ${bufferTime}ms buffer = ${duration}ms total)`
+        );
+      } else {
+        // ✅ For text: use amount-based duration
+        duration = calculateAlertDuration(nextAlert.amount);
+
+        console.log(
+          `⏱️ Text duration: ${duration}ms (based on amount: ${formatRupiah(
+            nextAlert.amount
+          )})`
+        );
       }
 
-      // 8. Reset currentTime sebelum play
-      audioRef.current.currentTime = 0;
-      audioRef.current
-        .play()
-        .catch((err) => console.log(`Error play sound:`, err));
-
-      // 9. Hitung durasi alert berdasarkan amount
-      const duration = calculateAlertDuration(nextAlert.amount);
-      // 10. Simpan duration ke state untuk sebagai referensi progress bar
       setAlertDuration(duration);
 
       // 11. Setelah durasi selesai, sembunyikan alert dan reset state
@@ -213,10 +273,19 @@ export default function AlertWidget() {
               {/* Akhir Amount */}
             </div>
             {/* Akhir Amount */}
+
             {/* Awal Message */}
             <div className=" bg-[#B30838]  w-full h-fit text-white rounded-2xl text-justify text-lg font-medium flex flex-col overflow-hidden gap-3">
               {/* Awal Isi Message */}
-              <div className="px-4 pt-4">{currentAlert.message}</div>
+              {currentAlert.messageType === "voice" ? (
+                // ✅ VOICE MESSAGE - Waveform Animation
+                <VoiceWaveform duration={currentAlert.voiceDuration} />
+              ) : (
+                // ✅ TEXT MESSAGE - Normal Display
+                <div className="px-4 pt-4 text-justify">
+                  {currentAlert.message || "No message"}
+                </div>
+              )}
               {/* Akhir Isi Message */}
 
               {/* Awal Created At */}

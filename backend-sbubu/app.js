@@ -8,6 +8,7 @@ const app = express();
 const port = 3000;
 const cors = require("cors");
 const router = require("./routes");
+const path = require("path");
 const { Server } = require("socket.io");
 
 // Buat HTTP server ( bukan langsung dari express )
@@ -35,6 +36,16 @@ app.use(
     },
   })
 ); // Serve static files from the 'public' directory
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".webm")) {
+        res.set("Content-Type", "audio/webm");
+      }
+    },
+  })
+);
 
 // Socket.io Connection Handling
 io.on("connection", (socket) => {

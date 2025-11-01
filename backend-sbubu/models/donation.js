@@ -117,7 +117,15 @@ module.exports = (sequelize, DataTypes) => {
       originalMessage: {
         type: DataTypes.TEXT,
         allowNull: true,
-      }
+      },
+      voiceUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
+      voiceDuration: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     },
     {
       sequelize,
