@@ -216,6 +216,102 @@ class UserController {
       next(error);
     }
   }
+
+  static async editProfile(req, res, next) {
+    try {
+      const userId = req.user.id;
+
+      const { avatarUrl, banner, name, bio, username, socialMediaLinks } =
+        req.body;
+
+      const findUser = await User.findByPk(userId);
+      if (!findUser) throw { name: "USER_NOT_FOUND" };
+
+      const updateData = {};
+
+      if (avatarUrl) updateData.avatarUrl = avatarUrl;
+      if (banner) updateData.banner = banner;
+      if (name) updateData.name = name;
+      if (bio) updateData.bio = bio;
+      if (username) {
+        // Cek username sudah ada atau belum
+        const checkUsername = await User.findOne({
+          where: {
+            username,
+          },
+        });
+
+        if (checkUsername && checkUsername.id !== userId) {
+          throw { name: "USER_REGISTER_USERNAME_UNIQUE" };
+        }
+        updateData.username = username;
+      }
+      if (socialMediaLinks) {
+        try {
+          const newSocialMediaLinks = JSON.parse(socialMediaLinks);
+
+          const existingSocialMediaLinks = findUser.socialMediaLinks || {};
+
+          // Gabungkan existing dengan yang baru
+          let gabungkanSocialMediaLinks = {
+            youtube:
+              newSocialMediaLinks.youtube !== undefined
+                ? newSocialMediaLinks.youtube
+                : existingSocialMediaLinks.youtube || "",
+            instagram:
+              newSocialMediaLinks.instagram !== undefined
+                ? newSocialMediaLinks.instagram
+                : existingSocialMediaLinks.instagram || "",
+            twitter:
+              newSocialMediaLinks.twitter !== undefined
+                ? newSocialMediaLinks.twitter
+                : existingSocialMediaLinks.twitter || "",
+            tiktok:
+              newSocialMediaLinks.tiktok !== undefined
+                ? newSocialMediaLinks.tiktok
+                : existingSocialMediaLinks || "",
+            threads:
+              newSocialMediaLinks.threads !== undefined
+                ? newSocialMediaLinks.threads
+                : existingSocialMediaLinks.threads || "",
+          };
+
+          updateData.socialMediaLinks = gabungkanSocialMediaLinks;
+        } catch (error) {
+          // Jika gagal parsing JSON, abaikan pembaruan socialMediaLinks
+          console.log("Gagal parsing socialMediaLinks:", error);
+        }
+      }
+
+      // Handle file uploads
+      if (req.files) {
+        if (req.files.avatarUrl && req.files.avatarUrl.length > 0) {
+          updateData.avatarUrl = req.files.avatarUrl[0].path;
+        }
+
+        if (req.files.banner && req.files.banner.length > 0) {
+          updateData.banner = req.files.banner[0].path;
+        }
+      }
+
+      // Update user
+      await User.update(updateData, {
+        where: {
+          id: userId,
+        },
+      });
+
+      const updatedUser = await User.findByPk(userId, {
+        attributes: { exclude: ["password"] },
+      });
+
+      res
+        .status(200)
+        .json({ message: "Profile updated successfully", user: updatedUser });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = UserController;

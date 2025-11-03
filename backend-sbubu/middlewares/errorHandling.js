@@ -47,6 +47,8 @@ async function errorHandler(err, req, res, next) {
     res.status(400).json({ message: "Banned word is required" });
   } else if (err.name === "BANNED_WORD_VALIDATION") {
     res.status(400).json({ message: "Banned word cannot be empty" });
+  } else if (err.name === "USER_REGISTER_USERNAME_UNIQUE") {
+    res.status(400).json({ message: "Username is already taken" });
   }
 }
 

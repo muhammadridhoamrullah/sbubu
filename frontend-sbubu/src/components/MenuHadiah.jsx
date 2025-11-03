@@ -23,11 +23,14 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
 
   const isLogin = dataUser && awalDikirimSebagai;
 
-  // State untuk messageType
+  // State untuk messageType, apakah itu text, voice, youtube, tiktok, reels
   const [messageType, setMessageType] = useState("text");
-  const [mediaData, setMediaData] = useState(null);
-  console.log(mediaData, "MediaData");
 
+  // State untuk mediaData (voice, youtube, etc), contoh { audioBlob: Blob, duration: number } untuk voice note
+  const [mediaData, setMediaData] = useState(null);
+  console.log("Media Data", mediaData);
+
+  // State untuk formDonation
   const [formDonation, setFormDonation] = useState({
     donorName: dataUser && awalDikirimSebagai ? dataUser?.username : "",
     donorEmail: dataUser && awalDikirimSebagai ? dataUser?.email : "",
@@ -35,12 +38,11 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
     message: "",
   });
 
-  // Check voice note akan avail kalo amount >= 50000
-
   //   function changeHandler
   function changeHandler(e) {
     const { name, value } = e.target;
 
+    // Ini agar memastikan hanya angka yang dimasukkan untuk "amount"
     if (name === "amount") {
       const numericValue = value.replace(/[^0-9]/g, "");
 
@@ -62,21 +64,25 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
   async function submitHandler(e) {
     e.preventDefault();
 
-    // Validasi formDonation
+    // 1. Buat payload atau keseluruhan data dari formDonation
     let payload = { ...formDonation };
 
+    // 2. Cek jika hideFromCreator true, maka reassign donorName dan donorEmail
     if (hideFromCreator) {
-      payload.donorName = "Anonymous";
-      payload.donorEmail = "anonymous@gmail.com";
+      payload.donorName = "Seseorang";
+      payload.donorEmail = "seseorang@gmail.com";
     }
 
+    // 3. Memastikan kembalikan tipe data amount ke number
     payload.amount = Number(payload.amount);
 
+    // 4. Cek jika amount tidak ada atau kurang dari 5000, maka tampilkan toast error
     if (!payload.amount || payload.amount < 5000) {
       toast.error("Jumlah hadiah minimal adalah IDR 5.000");
       return;
     }
-    // ✅ Validasi spesifik per messageType
+
+    // 5. Validasi media berdasarkan messageType, tidak boleh kosong
     if (messageType === "text") {
       // Text mode: tidak perlu validasi media
       console.log("📝 Text mode - no media required");
@@ -102,16 +108,14 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       }
     }
 
-    // ✅ Create FormData
+    // 6. Siapkan formData untuk dikirim ke backend, formData ini akan menampung semua data termasuk file jika ada
     const formData = new FormData();
     formData.append("donorName", payload.donorName);
     formData.append("donorEmail", payload.donorEmail);
     formData.append("amount", payload.amount);
     formData.append("messageType", messageType);
 
-    console.log("📤 Preparing FormData...");
-    console.log("Message Type:", messageType);
-
+    // 7. Append/tambahkan data ke formData sesuai dengan messageTypenya
     if (messageType === "text") {
       formData.append("message", payload.message || "");
     } else if (messageType === "voice" && mediaData?.audioBlob) {
@@ -128,6 +132,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       formData.append("mediaTitle", mediaData?.mediaTitle);
     }
 
+    // 8. Dispatch lakukanPembayaran dengan formData dan username streamer
     dispatch(lakukanPembayaran(formData, username));
   }
 
@@ -160,7 +165,6 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
             });
 
             toast.success("Pembayaran berhasil dilakukan.");
-            await new Promise((resolve) => setTimeout(resolve, 3000));
 
             navigate(`/transaction/${result.order_id}`);
           } catch (error) {
@@ -256,10 +260,12 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       message: formDonation.message, // Keep message
     });
   }
-  // Function callback dari child
+  // Function callback dari child, child atau menu mediashare mengirim datanya ke parent (MenuHadiah) state mediaData
   function handleMediaDataChange(data) {
     setMediaData(data);
   }
+
+  // Daftar menu/fitur mediashare
   const menuMediashare = [
     { name: "Youtube", type: "youtube" },
     { name: "Tiktok", type: "tiktok" },
@@ -267,6 +273,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
     { name: "Voice Note", type: "voice" },
   ];
 
+  // Passing function handleMediaDataChange ke masing-masing komponen mediashare agar komponen tersebut dapat mengirim data ke parent (MenuHadiah) ke state mediaData
   const menuMediashareComponents = {
     youtube: <div>Youtube Component</div>,
     tiktok: <div>Tiktok Component</div>,
@@ -464,12 +471,12 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
                 <div
                   key={idx}
                   onClick={() => {
-                    setMessageType(el.type);
+                    setMessageType(isActive ? "text" : el.type);
                     setMediaData(null);
                   }}
                   className={`${
-                    isActive ? "bg-blue-700" : "bg-[#1A2B32]"
-                  } py-2 px-4 rounded-md hover:bg-blue-700 transition-all duration-300`}
+                    isActive ? "bg-pink-600" : "bg-[#1A2B32]"
+                  } py-2 px-4 rounded-md hover:bg-pink-600 transition-all duration-300`}
                 >
                   {el.name}
                 </div>
@@ -480,7 +487,11 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
 
           {/* Awal Menu Mediashare */}
 
-          <div className=" p-4 w-full h-fit overflow-hidden ">
+          <div
+            className={`${
+              messageType === "text" ? "hidden" : ""
+            } p-4 w-full h-fit overflow-hidden `}
+          >
             {menuMediashareComponents[messageType]}
           </div>
           {/* Akhir Menu Mediashare */}

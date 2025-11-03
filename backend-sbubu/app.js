@@ -36,6 +36,8 @@ app.use(
     },
   })
 ); // Serve static files from the 'public' directory
+
+
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {

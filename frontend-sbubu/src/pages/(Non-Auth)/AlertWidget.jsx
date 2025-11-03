@@ -121,8 +121,7 @@ export default function AlertWidget() {
       const handleAudioPlayback = async () => {
         try {
           if (nextAlert.messageType === "voice" && nextAlert.voiceUrl) {
-            const voiceUrl = `${BACKEND_URL}${nextAlert.voiceUrl}`;
-            console.log("🎙️ Playing voice note:", voiceUrl);
+            const voiceUrl = `${nextAlert.voiceUrl}`;
 
             if (!audioRef.current) {
               audioRef.current = new Audio(voiceUrl);
@@ -175,19 +174,9 @@ export default function AlertWidget() {
         const voiceDurationMs = nextAlert.voiceDuration * 1000; // Convert to milliseconds
         const bufferTime = 3000; // 3 seconds buffer for animation
         duration = voiceDurationMs + bufferTime;
-
-        console.log(
-          `⏱️ Voice duration: ${nextAlert.voiceDuration}s (${voiceDurationMs}ms + ${bufferTime}ms buffer = ${duration}ms total)`
-        );
       } else {
         // ✅ For text: use amount-based duration
         duration = calculateAlertDuration(nextAlert.amount);
-
-        console.log(
-          `⏱️ Text duration: ${duration}ms (based on amount: ${formatRupiah(
-            nextAlert.amount
-          )})`
-        );
       }
 
       setAlertDuration(duration);

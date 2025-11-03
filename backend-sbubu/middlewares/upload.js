@@ -1,23 +1,50 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
-const uploadDir = "./uploads/voices";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// 1. Setup Cloudinary configuration from .env
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `voice-${uniqueSuffix}.webm`);
+// 2. Setup cloudinary storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    let folder = "sbubu_media";
+    switch (file.fieldname) {
+      case "voiceFile":
+        folder = "sbubu_voices";
+        break;
+      case "avatarUrl":
+        folder = "sbubu_profile_pictures";
+        break;
+      case "banner":
+        folder = "sbubu_banner_pictures";
+        break;
+    }
+
+    const format = file.mimetype.split("/")[1];
+
+    return {
+      folder: folder,
+      resource_type: "auto",
+      format,
+      public_id: `${file.fieldname}-${Date.now()}_${
+        path.parse(file.originalname).name
+      }`,
+    };
   },
 });
 
+// 3. Buat instance multer dengan storage Cloudinary
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
 });
 
 module.exports = upload;

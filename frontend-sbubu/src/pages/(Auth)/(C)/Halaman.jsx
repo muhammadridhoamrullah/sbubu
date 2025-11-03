@@ -1,7 +1,21 @@
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import {
+  editProfileReset,
+  editUserProfile,
+  fetchUserData,
+} from "../../../store/userSlice";
 
 export default function Halaman({ data }) {
+  const {
+    dataEditProfile,
+    loadingEditProfile,
+    errorEditProfile,
+    completedEditProfile,
+  } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [copied, setCopied] = useState(false);
   const [selectedFileProfil, setSelectedFileProfil] = useState(null);
   const [selectedFileBanner, setSelectedFileBanner] = useState(null);
@@ -13,12 +27,48 @@ export default function Halaman({ data }) {
     name: data?.name || "",
     username: data?.username || "",
     bio: data?.bio || "",
-    youtube: data?.socialMediaLinks?.youtube || "",
-    instagram: data?.socialMediaLinks?.instagram || "",
-    tiktok: data?.socialMediaLinks?.tiktok || "",
-    twitter: data?.socialMediaLinks?.twitter || "",
-    threads: data?.socialMediaLinks?.threads || "",
+    socialMediaLinks: {
+      youtube: data?.socialMediaLinks?.youtube || "",
+      instagram: data?.socialMediaLinks?.instagram || "",
+      tiktok: data?.socialMediaLinks?.tiktok || "",
+      twitter: data?.socialMediaLinks?.twitter || "",
+      threads: data?.socialMediaLinks?.threads || "",
+    },
   });
+
+  const [salinanForm, setSalinanForm] = useState({
+    name: data?.name || "",
+    username: data?.username || "",
+    bio: data?.bio || "",
+    socialMediaLinks: {
+      youtube: data?.socialMediaLinks?.youtube || "",
+      instagram: data?.socialMediaLinks?.instagram || "",
+      tiktok: data?.socialMediaLinks?.tiktok || "",
+      twitter: data?.socialMediaLinks?.twitter || "",
+      threads: data?.socialMediaLinks?.threads || "",
+    },
+    avatarUrl: data?.avatarUrl || "",
+    banner: data?.banner || "",
+  });
+
+  let toastSudahMuncul = useRef(false);
+
+  useEffect(() => {
+    if (errorEditProfile) {
+      toast.error(errorEditProfile);
+    }
+  }, [errorEditProfile]);
+
+  useEffect(() => {
+    if (completedEditProfile && !toastSudahMuncul.current) {
+      toastSudahMuncul.current = true;
+      (async () => {
+        toast.success("Profil berhasil diperbarui");
+        await dispatch(fetchUserData());
+        dispatch(editProfileReset());
+      })();
+    }
+  }, [completedEditProfile]);
 
   // Change Handler
   function changeHandler(e) {
@@ -27,6 +77,17 @@ export default function Halaman({ data }) {
     setFormData({
       ...formData,
       [name]: value,
+    });
+  }
+
+  function changeHanlderSocialMedia(e) {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      socialMediaLinks: {
+        ...formData.socialMediaLinks,
+        [name]: value,
+      },
     });
   }
 
@@ -70,10 +131,10 @@ export default function Halaman({ data }) {
         return;
       }
 
-      // Validasi ukuran file (maksimal 5MB)
-      const maxSizeInBytes = 5 * 1024 * 1024;
+      // Validasi ukuran file (maksimal 10MB)
+      const maxSizeInBytes = 10 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
-        toast.error("Ukuran file maksimal 5MB");
+        toast.error("Ukuran file maksimal 10MB");
         return;
       }
 
@@ -84,39 +145,32 @@ export default function Halaman({ data }) {
 
   async function submitHandler(e) {
     e.preventDefault();
+    console.log("Ter click");
 
-    // Nanti
-    // const submitData = new FormData();
-    // // Tambahkan text data
-    // Object.keys(formData).forEach((key) => {
-    //   submitData.append(key, formData[key]);
-    // });
+    // 1. Buat variabel payload untuk menampung data yang akan dikirim
+    let payload = { ...formData };
 
-    // // Tambahkan file jika ada
-    // if (selectedFileProfil) {
-    //   submitData.append("fotoProfil", selectedFileProfil);
-    // }
+    // 2. Buat FormData untuk mengirim data beserta file
+    const submittedData = new FormData();
+    submittedData.append("name", payload.name);
+    submittedData.append("username", payload.username);
+    submittedData.append("bio", payload.bio);
+    submittedData.append(
+      "socialMediaLinks",
+      JSON.stringify(payload.socialMediaLinks)
+    );
 
-    // if (selectedFileBanner) {
-    //   submitData.append("fotoBanner", selectedFileBanner);
-    // }
+    // 3. Jika ada file foto profil yang dipilih, tambahkan ke FormData
+    if (selectedFileProfil) {
+      submittedData.append("avatarUrl", selectedFileProfil);
+    }
 
-    // try {
-    //   const response = await fetch("/api/update-profile", {
-    //     method: "POST",
-    //     body: submitData,
-    //     // Jangan set Content-Type, biar browser yang set otomatis untuk multipart/form-data
-    //   });
+    // 4. Jika ada file banner yang dipilih, tambahkan ke FormData
+    if (selectedFileBanner) {
+      submittedData.append("banner", selectedFileBanner);
+    }
 
-    //   if (response.ok) {
-    //     toast.success("Profil berhasil diperbarui");
-    //   } else {
-    //     toast.error("Gagal memperbarui profil");
-    //   }
-    // } catch (error) {
-    //   console.error(error);
-    //   toast.error("Terjadi kesalahan");
-    // }
+    dispatch(editUserProfile(submittedData));
   }
 
   //   fungsi untuk menyalin link halaman
@@ -143,6 +197,33 @@ export default function Halaman({ data }) {
   async function handleClickDelete() {
     console.log(`Delete`);
   }
+
+  function isAnyChangeMade() {
+    if (!salinanForm) return false;
+
+    return (
+      salinanForm.name !== formData.name ||
+      salinanForm.username !== formData.username ||
+      salinanForm.bio !== formData.bio ||
+      salinanForm.socialMediaLinks.youtube !==
+        formData.socialMediaLinks.youtube ||
+      salinanForm.socialMediaLinks.instagram !==
+        formData.socialMediaLinks.instagram ||
+      salinanForm.socialMediaLinks.tiktok !==
+        formData.socialMediaLinks.tiktok ||
+      salinanForm.socialMediaLinks.twitter !==
+        formData.socialMediaLinks.twitter ||
+      salinanForm.socialMediaLinks.threads !==
+        formData.socialMediaLinks.threads ||
+      selectedFileProfil !== null ||
+      selectedFileBanner !== null
+    );
+  }
+
+  if (loadingEditProfile) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <form
       onSubmit={submitHandler}
@@ -413,8 +494,8 @@ export default function Halaman({ data }) {
               id="youtube"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
               placeholder="https://www.youtube.com/channel/UCy3zgWom-5AGypGX_FVTKpg"
-              value={formData.youtube}
-              onChange={changeHandler}
+              value={formData.socialMediaLinks.youtube}
+              onChange={changeHanlderSocialMedia}
             />
             {/* Akhir Input Youtube */}
           </div>
@@ -433,8 +514,8 @@ export default function Halaman({ data }) {
               id="instagram"
               placeholder="https://www.instagram.com/oliviarodrigo/?hl=en"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
-              value={formData.instagram}
-              onChange={changeHandler}
+              value={formData.socialMediaLinks.instagram}
+              onChange={changeHanlderSocialMedia}
             />
             {/* Akhir Input Instagram */}
           </div>
@@ -453,8 +534,8 @@ export default function Halaman({ data }) {
               id="tiktok"
               placeholder="https://www.tiktok.com/@livbedumb?lang=en"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
-              value={formData.tiktok}
-              onChange={changeHandler}
+              value={formData.socialMediaLinks.tiktok}
+              onChange={changeHanlderSocialMedia}
             />
             {/* Akhir Input TikTok */}
           </div>
@@ -473,8 +554,8 @@ export default function Halaman({ data }) {
               id="twitter"
               placeholder="https://x.com/oliviarodrigo"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
-              value={formData.twitter}
-              onChange={changeHandler}
+              value={formData.socialMediaLinks.twitter}
+              onChange={changeHanlderSocialMedia}
             />
             {/* Akhir Input Twitter */}
           </div>
@@ -494,8 +575,8 @@ export default function Halaman({ data }) {
               id="threads"
               placeholder="https://www.threads.com/@oliviarodrigo"
               className="bg-[#1A2B32] w-full h-fit p-2 rounded-md outline-none placeholder:text-gray-500"
-              value={formData.threads}
-              onChange={changeHandler}
+              value={formData.socialMediaLinks.threads}
+              onChange={changeHanlderSocialMedia}
             />
             {/* Akhir Input Threads */}
           </div>
@@ -508,7 +589,12 @@ export default function Halaman({ data }) {
       {/* Awal Button */}
       <button
         type="submit"
-        className="bg-blue-600 w-full h-fit p-4 rounded-md text-xl font-semibold hover:bg-blue-800 transition-all duration-300 cursor-pointer text-center"
+        disabled={!isAnyChangeMade()}
+        className={`${
+          isAnyChangeMade()
+            ? "bg-blue-600 hover:bg-blue-800 cursor-pointer "
+            : "bg-gray-600 cursor-not-allowed opacity-60"
+        } w-full h-fit p-4 rounded-md text-xl font-semibold  transition-all duration-300 text-center`}
       >
         SUBMIT
       </button>

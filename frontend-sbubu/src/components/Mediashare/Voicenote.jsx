@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
+// Menerima props onDataChange dari parent (MenuHadiah.jsx) yaitu setter untuk menyimpan data voicenote
 export default function Voicenote({ onDataChange }) {
   // State untuk voicenote
+
+  // 1. State untuk merekam, isRecording: true = sedang merekam, false = tidak merekam
+  // 2. State untuk menyimpan durasi rekaman, dalam satuan detik
+  // 3. State untuk menyimpan hasil rekaman, contohnya Blob audio/webm
+  // 4. State untuk menyimpan URL audio hasil rekaman untuk preview
+  // "" = no preview, "blob:http://..." = can preview
+  // 5. State untuk play/pause preview audio
+  // 6. State untuk menyimpan mikrofon yang dipilih
+  // 7. State untuk menyimpan daftar mikrofon yang tersedia
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -11,7 +21,12 @@ export default function Voicenote({ onDataChange }) {
   const [selectedMicrophone, setSelectedMicrophone] = useState("");
   const [availableMicrophones, setAvailableMicrophones] = useState([]);
 
-  // Ref untuk voicenote
+  // Ref untuk voicenote, Refs untuk persistent values (tidak trigger re-render)
+
+  // 1. Ref untuk menyimpan instance MediaRecorder
+  // 2. Ref untuk menyimpan chunks audio yang direkam sementara, sebelum di-convert ke Blob pada saat onstop
+  // 3. Ref untuk menyimpan interval timer perekaman
+  // 4. Ref untuk elemen audio player (preview)
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerIntervalRef = useRef(null);
@@ -32,7 +47,7 @@ export default function Voicenote({ onDataChange }) {
 
         setAvailableMicrophones(audioInputs);
 
-        // Set default microphone
+        // Set default microphone, ini untuk memilih mikrofon pertama jika ada yang tersedia
         if (audioInputs.length > 0) {
           setSelectedMicrophone(audioInputs[0].deviceId);
         }
@@ -43,11 +58,13 @@ export default function Voicenote({ onDataChange }) {
       }
     }
 
+    // Jalankan fungsi untuk mendapatkan mikrofon
     getMicrophones();
   }, []);
 
   //   useEffect untuk memberitahu parent component ketika ada perubahan data voicenote
   useEffect(() => {
+    // Cek jika ada audioBlob (rekaman selesai, pada saat onstop MediaRecorder), maka panggil onDataChange dengan data rekaman tersebut
     if (audioBlob) {
       onDataChange({
         audioBlob: audioBlob,
@@ -56,67 +73,86 @@ export default function Voicenote({ onDataChange }) {
     } else {
       onDataChange(null);
     }
+
+    // Dependency hanya pada audioBlob dan recordingTime
   }, [audioBlob, recordingTime, onDataChange]);
 
   // Async function untuk start recording
   async function startRecording() {
     try {
-      // Minta izin akses mikrofon
+      // 1. Pilih mikrofon berdasarkan selectedMicrophone dan minta izin akses mikrofon
       const constraint = {
         audio: selectedMicrophone
           ? { deviceId: { exact: selectedMicrophone } }
           : true,
       };
+
+      // 2. Dapatkan stream audio dari mikrofon, untuk merekam, aliran audio dari mikrofon
       const stream = await navigator.mediaDevices.getUserMedia(constraint);
 
-      // Buat MediaRecorder untuk merekam audio
+      // 3. Buat instance MediaRecorder untuk merekam audio dari stream
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: "audio/webm",
       });
 
+      // 4. Hubungkan ref dan event handler untuk MediaRecorder
       mediaRecorderRef.current = mediaRecorder;
+
+      // 5. Siapkan array untuk menyimpan chunks audio, yaitu potongan-potongan data audio yang direkam
       audioChunksRef.current = [];
 
+      // 6. Event handler untuk menangani dataavailable, yaitu ketika ada data audio yang tersedia maka simpan ke audioChunksRef, ini potongan-potongan data audio
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
 
+      // 7. Event handler untuk menangani stop recording, yaitu ketika perekaman dihentikan maka gabungkan chunks menjadi Blob, dan simpan ke audioBlob dan audioUrl untuk preview
       mediaRecorder.onstop = () => {
+        // Gabungkan chunks menjadi Blob audio/webm
         const audioBlob = new Blob(audioChunksRef.current, {
           type: "audio/webm",
         });
 
+        // Buat URL untuk preview audio
         const audioUrl = URL.createObjectURL(audioBlob);
 
+        // Set state audioBlob dan audioUrl
         setAudioBlob(audioBlob);
         setAudioUrl(audioUrl);
 
+        // Hentikan semua track pada stream untuk melepaskan mikrofon
         stream.getTracks().forEach((track) => track.stop());
       };
 
+      // 8. Mulai merekam, panggil mediaRecorder.start(), nilai default adalah 0ms (langsung mulai)
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
 
-      //   Automatis stop recording setelah 15 detik
+      // 9. Mulai timer untuk menghitung durasi perekaman
       let shouldAutoStop = false;
 
       timerIntervalRef.current = setInterval(() => {
+        // Update recording time setiap detik
         setRecordingTime((prev) => {
           const newTime = prev + 1;
 
+          // Cek jika durasi mencapai 15 detik untuk auto-stop
           if (newTime >= 15) {
             shouldAutoStop = true;
+
+            // Auto-stop berarti recordingTime menjadi 15 detik
             return 15;
           }
 
           return newTime;
         });
 
-        // ✅ Auto-stop OUTSIDE of setState callback
+        // Kalo shouldAutoStop true dan mediaRecorderRef ada, maka stop recording
         if (shouldAutoStop && mediaRecorderRef.current) {
+          // Clear interval timer dan reset ref
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
 
@@ -129,7 +165,7 @@ export default function Voicenote({ onDataChange }) {
 
           shouldAutoStop = false; // Reset flag
         }
-      }, 1000);
+      }, 1000); // setiap 1000ms = 1 detik
 
       toast.success("🎙️ Perekaman dimulai.");
     } catch (error) {
@@ -147,12 +183,14 @@ export default function Voicenote({ onDataChange }) {
     }
   }
 
-  // async function untuk stop recording
+  // Async function untuk stop recording
   async function stopRecording() {
+    // 1. Cek jika mediaRecorderRef ada dan sedang merekam, maka panggil stop()
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
 
+      // 2. Hentikan timer perekaman, dan reset ref
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
@@ -162,21 +200,25 @@ export default function Voicenote({ onDataChange }) {
     }
   }
 
-  // ✅ Reset recording
+  // Function untuk mereset/restart rekaman
   function resetRecording() {
+    // 1. Jika sedang merekam, hentikan perekaman
     if (isRecording) {
       stopRecording();
     }
 
+    // 2. Hentikan timer perekaman jika ada, dan reset ref
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
 
+    // 3. Hapus audioBlob dan audioUrl, serta revoke URL lama jika ada
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
 
+    // 4. Reset semua state terkait rekaman
     setAudioBlob(null);
     setAudioUrl(null);
     setRecordingTime(0);
@@ -218,7 +260,6 @@ export default function Voicenote({ onDataChange }) {
   return (
     <div className="w-full h-fit flex flex-col gap-2 justify-start items-start">
       {/* Awal Pilih Mikrofon */}
-
       <div className="w-full h-fit flex flex-col gap-2 justify-start items-start">
         {/* Awal Judul Pilih Mikrofon */}
         <div>Pilih Mikrofon</div>
@@ -229,7 +270,7 @@ export default function Voicenote({ onDataChange }) {
           value={selectedMicrophone}
           onChange={(e) => setSelectedMicrophone(e.target.value)}
           disabled={isRecording || audioBlob !== null}
-          className={`w-full h-fit px-3 py-2 bg-[#0F1419] border border-gray-700 rounded-lg text-white outline-none focus:border-pink-500 transition-all duration-300 ${
+          className={`w-full h-fit p-2 bg-[#0F1419] border border-gray-700 rounded-lg text-white outline-none focus:border-pink-500 transition-all duration-300 ${
             isRecording || audioBlob
               ? "cursor-not-allowed opacity-50"
               : "cursor-pointer"
@@ -261,7 +302,7 @@ export default function Voicenote({ onDataChange }) {
 
       {/* Awal Recording Controls */}
       {!audioBlob && (
-        <div className="w-full h-fit flex flex-col items-center gap-4 py-4">
+        <div className=" w-full h-fit flex flex-col justify-center items-center gap-4 ">
           {/* Awal Recording Button */}
           {!isRecording ? (
             <button

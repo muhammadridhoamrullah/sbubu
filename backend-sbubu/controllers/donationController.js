@@ -46,16 +46,6 @@ class DonationController {
       // Ambil username
       const { username } = req.params;
 
-      // ✅ DEBUG: Log entire request
-      console.log("📥 Request details:", {
-        method: req.method,
-        url: req.url,
-        contentType: req.headers["content-type"],
-        hasBody: !!req.body,
-        bodyKeys: req.body ? Object.keys(req.body) : "undefined",
-        hasFile: !!req.file,
-      });
-
       // ✅ SAFE: Check if req.body exists before destructuring
       if (!req.body) {
         console.error("❌ req.body is undefined!");
@@ -64,6 +54,7 @@ class DonationController {
           message: "Request body is missing. Check middleware configuration.",
         };
       }
+
       const {
         donorName,
         donorEmail,
@@ -72,7 +63,6 @@ class DonationController {
         voiceDuration,
         messageType,
       } = req.body;
-      console.log(req.body, "di createDon");
 
       // Validasi Input
       if (!donorName || !amount) {
@@ -94,15 +84,8 @@ class DonationController {
 
       if (messageType === "voice" && req.file) {
         // ✅ Voice message
-        voiceUrl = `/uploads/voices/${req.file.filename}`;
+        voiceUrl = req.file.path;
         finalVoiceDuration = voiceDuration ? parseInt(voiceDuration) : null;
-
-        console.log("🎙️ Voice note uploaded:", {
-          filename: req.file.filename,
-          path: voiceUrl,
-          size: req.file.size,
-          duration: finalVoiceDuration,
-        });
       } else if (messageType === "text" && message) {
         // ✅ Text message - check banned words
         const result = await checkBannedWords(message);
@@ -114,16 +97,9 @@ class DonationController {
         if (isBanned) {
           originalMessage = result.originalMessage;
         }
-
-        console.log("📝 Text message:", {
-          original: message,
-          final: finalMessage,
-          banned: isBanned,
-        });
       } else if (messageType === "text") {
         // ✅ Empty text message
         finalMessage = "";
-        console.log("📝 Empty text message");
       }
       // Cari streamer berdasarkan username
       let streamer = await User.findOne({
@@ -172,9 +148,9 @@ class DonationController {
         amount,
         message: finalMessage,
         originalMessage: originalMessage || null,
-        messageType: messageType || "text", // ✅ Use from request
+        messageType: messageType || "text",
         voiceUrl: voiceUrl, // ✅ Add voice URL
-        voiceDuration: finalVoiceDuration, // ✅ Add voice duration
+        voiceDuration: finalVoiceDuration,
         status: "pending",
         midtransToken: midtransToken.token,
       });

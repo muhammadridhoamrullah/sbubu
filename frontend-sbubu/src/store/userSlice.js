@@ -10,6 +10,10 @@ export const userSlice = createSlice({
     dataDonation: null,
     loadingDonation: false,
     errorDonation: null,
+    dataEditProfile: null,
+    loadingEditProfile: false,
+    errorEditProfile: null,
+    completedEditProfile: false,
   },
   reducers: {
     userRequest: (state) => {
@@ -36,6 +40,27 @@ export const userSlice = createSlice({
       state.loadingDonation = false;
       state.errorDonation = action.payload;
     },
+    editProfileRequest: (state) => {
+      state.loadingEditProfile = true;
+      state.errorEditProfile = null;
+      state.completedEditProfile = false;
+    },
+    editProfileSuccess: (state, action) => {
+      state.loadingEditProfile = false;
+      state.dataEditProfile = action.payload;
+      state.completedEditProfile = true;
+    },
+    editProfileError: (state, action) => {
+      state.loadingEditProfile = false;
+      state.errorEditProfile = action.payload;
+      state.completedEditProfile = false;
+    },
+    editProfileReset: (state) => {
+      state.dataEditProfile = null;
+      state.errorEditProfile = null;
+      state.completedEditProfile = false;
+      state.loadingEditProfile = false;
+    },
   },
 });
 
@@ -46,6 +71,10 @@ export const {
   donationRequest,
   donationSuccess,
   donationError,
+  editProfileRequest,
+  editProfileSuccess,
+  editProfileError,
+  editProfileReset
 } = userSlice.actions;
 
 export function fetchUserData() {
@@ -90,6 +119,30 @@ export function fetchUserDonationData() {
       dispatch(
         donationError(
           error.response.data.message || "Failed to fetch user data"
+        )
+      );
+    }
+  };
+}
+
+export function editUserProfile(formData) {
+  return async (dispatch) => {
+    try {
+      dispatch(editProfileRequest());
+
+      const access_token = localStorage.access_token;
+
+      const response = await instance.put("/user/editProfile", formData, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      dispatch(editProfileSuccess(response.data));
+    } catch (error) {
+      dispatch(
+        editProfileError(
+          error.response?.data?.message || "Failed to edit profile"
         )
       );
     }
