@@ -62,6 +62,11 @@ class DonationController {
         message,
         voiceDuration,
         messageType,
+        mediaUrl,
+        mediaTitle,
+        videoId,
+        startTime,
+        mediaDuration,
       } = req.body;
 
       // Validasi Input
@@ -74,13 +79,32 @@ class DonationController {
         throw { name: "DONATION_CREATE_INPUT_AMOUNT_ERROR" };
       }
 
+      // Function untuk menghitung durasi dari mediaDuration
+      function kalkulasiDurasiMedia(amount) {
+        if (amount >= 2500000) return 300;
+        if (amount >= 1000000) return 240;
+        if (amount >= 500000) return 180;
+        if (amount >= 250000) return 120;
+        if (amount >= 100000) return 60;
+        if (amount >= 50000) return 30;
+        return 15;
+      }
+
       // Check banned words in message
+      // Voice
       let voiceUrl = null;
       let finalVoiceDuration = null;
+      // Message
       let finalMessage = message || "";
       let isBanned = false;
       let bannedWordsFound = [];
       let originalMessage = "";
+      // Youtube
+      let finalMediaUrl = null;
+      let finalVideoId = null;
+      let finalMediaTitle = null;
+      let finalStartTime = null;
+      let finalMediaDuration = null;
 
       if (messageType === "voice" && req.file) {
         // ✅ Voice message
@@ -96,6 +120,25 @@ class DonationController {
 
         if (isBanned) {
           originalMessage = result.originalMessage;
+        }
+      } else if (messageType === "youtube" && mediaUrl) {
+        // Youtube mediashare
+        finalMediaUrl = mediaUrl;
+        finalVideoId = videoId;
+        finalMediaTitle = mediaTitle || "YouTube Video";
+        finalStartTime = startTime ? parseInt(startTime) : 0;
+        finalMediaDuration = kalkulasiDurasiMedia(parseInt(amount));
+
+        // Check message
+        if (message) {
+          const result = await checkBannedWords(message);
+          finalMessage = result.finalMessage;
+          isBanned = result.banned;
+          bannedWordsFound = result.bannedWords;
+
+          if (isBanned) {
+            originalMessage = result.originalMessage;
+          }
         }
       } else if (messageType === "text") {
         // ✅ Empty text message
@@ -153,6 +196,12 @@ class DonationController {
         voiceDuration: finalVoiceDuration,
         status: "pending",
         midtransToken: midtransToken.token,
+        // Youtube fields
+        mediaUrl: finalMediaUrl,
+        mediaTitle: finalMediaTitle,
+        videoId: finalVideoId,
+        startTime: finalStartTime,
+        mediaDuration: finalMediaDuration,
       });
 
       res.status(201).json({
@@ -169,6 +218,13 @@ class DonationController {
           voiceDuration: finalVoiceDuration,
           finalMessage: finalMessage,
           bannedWords: bannedWordsFound,
+          createdAt: newDonation.createdAt,
+          updatedAt: newDonation.updatedAt,
+          mediaUrl: newDonation.mediaUrl,
+          mediaTitle: newDonation.mediaTitle,
+          videoId: newDonation.videoId,
+          startTime: newDonation.startTime,
+          mediaDuration: newDonation.mediaDuration,
         },
         midtransToken: midtransToken.token,
         midtransRedirectUrl: midtransToken.redirect_url,
@@ -259,6 +315,12 @@ class DonationController {
           createdAt: donation.createdAt,
           isLogin,
           dataUser,
+          // Youtube fields
+          mediaUrl: donation.mediaUrl,
+          mediaTitle: donation.mediaTitle,
+          videoId: donation.videoId,
+          startTime: donation.startTime,
+          mediaDuration: donation.mediaDuration,
         };
 
         // Emit ke room streamer

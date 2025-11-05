@@ -126,6 +126,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      videoId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      startTime: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      mediaDuration: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     },
     {
       sequelize,
