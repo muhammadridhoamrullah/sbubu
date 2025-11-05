@@ -122,7 +122,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
     } else if (messageType === "voice" && mediaData?.audioBlob) {
       formData.append("voiceFile", mediaData.audioBlob, "voice-message.webm");
       formData.append("voiceDuration", mediaData.duration);
-    } else if (messageType === "youtube" && mediaData?.youtubeUrl) {
+    } else if (messageType === "youtube" && mediaData?.mediaUrl) {
       formData.append("mediaUrl", mediaData?.mediaUrl);
       formData.append("mediaTitle", mediaData?.mediaTitle);
       formData.append("videoId", mediaData?.videoId);

@@ -9,7 +9,8 @@ import confetti from "canvas-confetti";
 import { useRef } from "react";
 import { formatDate, formatRupiah } from "../../components/Helpers";
 import { MdVerified } from "react-icons/md";
-import { VoiceWaveform } from "../../components/Mediashare/VoiceWaveForm";
+import { VoiceWaveform } from "../../components/WidgetMediashare/VoiceWaveForm";
+import YoutubeWidget from "../../components/WidgetMediashare/YoutubeWidget";
 
 export default function AlertWidget() {
   const [searchParams] = useSearchParams();
@@ -174,6 +175,14 @@ export default function AlertWidget() {
         const voiceDurationMs = nextAlert.voiceDuration * 1000; // Convert to milliseconds
         const bufferTime = 3000; // 3 seconds buffer for animation
         duration = voiceDurationMs + bufferTime;
+      } else if (
+        nextAlert.messageType === "youtube" &&
+        nextAlert.mediaDuration
+      ) {
+        // ✅ For youtube: use mediaDuration + buffer time
+        const mediaDurationMs = nextAlert.mediaDuration * 1000;
+        const bufferTime = 4000; // 4 seconds buffer for animation
+        duration = mediaDurationMs + bufferTime;
       } else {
         // ✅ For text: use amount-based duration
         duration = calculateAlertDuration(nextAlert.amount);
@@ -213,6 +222,21 @@ export default function AlertWidget() {
       </div>
     );
   }
+
+  let dataYoutube = {
+    videoId: currentAlert?.videoId,
+    startTime: currentAlert?.startTime,
+    mediaDuration: currentAlert?.mediaDuration,
+    message: currentAlert?.message,
+  };
+
+  // Render media seesuai messageType
+  const mediaComponents = {
+    voice: <VoiceWaveform duration={currentAlert?.voiceDuration} />,
+    youtube: <YoutubeWidget data={dataYoutube} />,
+    tiktok: <div>Tikitokok</div>,
+    reels: <div>Reels</div>,
+  };
 
   return (
     <div className="bg-transparent w-full h-screen overflow-hidden flex justify-center items-center">
@@ -266,23 +290,18 @@ export default function AlertWidget() {
             {/* Awal Message */}
             <div className=" bg-[#B30838]  w-full h-fit text-white rounded-2xl text-justify text-lg font-medium flex flex-col overflow-hidden gap-3">
               {/* Awal Isi Message */}
-              {currentAlert.messageType === "voice" ? (
-                // ✅ VOICE MESSAGE - Waveform Animation
-                <VoiceWaveform duration={currentAlert.voiceDuration} />
-              ) : (
-                // ✅ TEXT MESSAGE - Normal Display
+
+              {mediaComponents[currentAlert.messageType] || (
                 <div className="px-4 pt-4 text-justify">
                   {currentAlert.message || "No message"}
                 </div>
               )}
               {/* Akhir Isi Message */}
-
               {/* Awal Created At */}
               <div className="px-4 text-sm text-gray-400">
                 {formatDate(currentAlert.createdAt)}
               </div>
               {/* Akhir Created At */}
-
               {/* Awal Progress Bar */}
               <div className="bg-[#B30838]] w-full h-3 overflow-hidden  relative l">
                 <div

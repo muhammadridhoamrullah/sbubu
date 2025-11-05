@@ -79,17 +79,6 @@ class DonationController {
         throw { name: "DONATION_CREATE_INPUT_AMOUNT_ERROR" };
       }
 
-      // Function untuk menghitung durasi dari mediaDuration
-      function kalkulasiDurasiMedia(amount) {
-        if (amount >= 2500000) return 300;
-        if (amount >= 1000000) return 240;
-        if (amount >= 500000) return 180;
-        if (amount >= 250000) return 120;
-        if (amount >= 100000) return 60;
-        if (amount >= 50000) return 30;
-        return 15;
-      }
-
       // Check banned words in message
       // Voice
       let voiceUrl = null;
@@ -127,7 +116,7 @@ class DonationController {
         finalVideoId = videoId;
         finalMediaTitle = mediaTitle || "YouTube Video";
         finalStartTime = startTime ? parseInt(startTime) : 0;
-        finalMediaDuration = kalkulasiDurasiMedia(parseInt(amount));
+        finalMediaDuration = mediaDuration ? parseInt(mediaDuration) : 15;
 
         // Check message
         if (message) {
