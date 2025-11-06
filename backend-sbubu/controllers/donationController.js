@@ -67,6 +67,7 @@ class DonationController {
         videoId,
         startTime,
         mediaDuration,
+        tiktokId,
       } = req.body;
 
       // Validasi Input
@@ -94,6 +95,8 @@ class DonationController {
       let finalMediaTitle = null;
       let finalStartTime = null;
       let finalMediaDuration = null;
+      // Tiktok
+      let finalTiktokId = null;
 
       if (messageType === "voice" && req.file) {
         // ✅ Voice message
@@ -116,6 +119,22 @@ class DonationController {
         finalVideoId = videoId;
         finalMediaTitle = mediaTitle || "YouTube Video";
         finalStartTime = startTime ? parseInt(startTime) : 0;
+        finalMediaDuration = mediaDuration ? parseInt(mediaDuration) : 15;
+
+        // Check message
+        if (message) {
+          const result = await checkBannedWords(message);
+          finalMessage = result.finalMessage;
+          isBanned = result.banned;
+          bannedWordsFound = result.bannedWords;
+
+          if (isBanned) {
+            originalMessage = result.originalMessage;
+          }
+        }
+      } else if (messageType === "tiktok" && tiktokId) {
+        // Tiktok mediashare
+        finalTiktokId = tiktokId;
         finalMediaDuration = mediaDuration ? parseInt(mediaDuration) : 15;
 
         // Check message
@@ -191,6 +210,8 @@ class DonationController {
         videoId: finalVideoId,
         startTime: finalStartTime,
         mediaDuration: finalMediaDuration,
+        // Tiktok fields
+        tiktokId: finalTiktokId,
       });
 
       res.status(201).json({
@@ -214,6 +235,7 @@ class DonationController {
           videoId: newDonation.videoId,
           startTime: newDonation.startTime,
           mediaDuration: newDonation.mediaDuration,
+          tiktokId: newDonation.tiktokId,
         },
         midtransToken: midtransToken.token,
         midtransRedirectUrl: midtransToken.redirect_url,
@@ -310,6 +332,8 @@ class DonationController {
           videoId: donation.videoId,
           startTime: donation.startTime,
           mediaDuration: donation.mediaDuration,
+          // Tiktok fields
+          tiktokId: donation.tiktokId,
         };
 
         // Emit ke room streamer

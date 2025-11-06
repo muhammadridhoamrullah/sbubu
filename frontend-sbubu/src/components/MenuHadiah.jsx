@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import instance from "../axiosInstance";
 import Voicenote from "./Mediashare/Voicenote";
 import Youtube from "./Mediashare/Youtube";
+import Tiktok from "./Mediashare/Tiktok";
 
 export default function MenuHadiah({ dataStreamer, dataUser }) {
   const username = dataStreamer?.streamer?.username;
@@ -98,7 +99,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
         return;
       }
     } else if (messageType === "tiktok") {
-      if (!mediaData || !mediaData.mediaUrl) {
+      if (!mediaData || !mediaData.tiktokId) {
         toast.error("Silakan masukkan URL TikTok");
         return;
       }
@@ -129,9 +130,10 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       formData.append("startTime", mediaData?.startTime);
       formData.append("mediaDuration", mediaData?.mediaDuration);
       formData.append("message", payload.message || "");
-    } else if (messageType === "tiktok" && mediaData?.tiktokUrl) {
-      formData.append("mediaUrl", mediaData?.mediaUrl);
-      formData.append("mediaTitle", mediaData?.mediaTitle);
+    } else if (messageType === "tiktok" && mediaData?.tiktokId) {
+      formData.append("tiktokId", mediaData?.tiktokId);
+      formData.append("mediaDuration", mediaData?.mediaDuration);
+      formData.append("message", payload.message || "");
     } else if (messageType === "reels" && mediaData?.reelsUrl) {
       formData.append("mediaUrl", mediaData?.mediaUrl);
       formData.append("mediaTitle", mediaData?.mediaTitle);
@@ -294,7 +296,20 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
           </div>
         </>
       ),
-    tiktok: <div>Tiktok Component</div>,
+    tiktok:
+      formDonation.amount >= 20000 ? (
+        <Tiktok
+          onDataChange={handleMediaDataChange}
+          amount={formDonation.amount}
+        />
+      ) : (
+        <>
+          <div className="w-full h-fit flex justify-center items-center text-red-500">
+            Membutuhkan minimal Rp 20.000 untuk menggunakan fitur Media Share
+            Tiktok.
+          </div>
+        </>
+      ),
     reels: <div>Reels Component</div>,
     voice:
       formDonation.amount >= 50000 ? (

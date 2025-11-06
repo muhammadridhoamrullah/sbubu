@@ -11,6 +11,7 @@ import { formatDate, formatRupiah } from "../../components/Helpers";
 import { MdVerified } from "react-icons/md";
 import { VoiceWaveform } from "../../components/WidgetMediashare/VoiceWaveForm";
 import YoutubeWidget from "../../components/WidgetMediashare/YoutubeWidget";
+import TiktokWidget from "../../components/WidgetMediashare/TiktokWidget";
 
 export default function AlertWidget() {
   const [searchParams] = useSearchParams();
@@ -183,6 +184,13 @@ export default function AlertWidget() {
         const mediaDurationMs = nextAlert.mediaDuration * 1000;
         const bufferTime = 4000; // 4 seconds buffer for animation
         duration = mediaDurationMs + bufferTime;
+      } else if (
+        nextAlert.messageType === "tiktok" &&
+        nextAlert.mediaDuration
+      ) {
+        const mediaDurationMs = nextAlert.mediaDuration * 1000;
+        const bufferTime = 3000;
+        duration = mediaDurationMs + bufferTime;
       } else {
         // ✅ For text: use amount-based duration
         duration = calculateAlertDuration(nextAlert.amount);
@@ -230,11 +238,17 @@ export default function AlertWidget() {
     message: currentAlert?.message,
   };
 
+  let dataTiktok = {
+    tiktokId: currentAlert?.tiktokId,
+    mediaDuration: currentAlert?.mediaDuration,
+    message: currentAlert?.message,
+  };
+
   // Render media seesuai messageType
   const mediaComponents = {
     voice: <VoiceWaveform duration={currentAlert?.voiceDuration} />,
     youtube: <YoutubeWidget data={dataYoutube} />,
-    tiktok: <div>Tikitokok</div>,
+    tiktok: <TiktokWidget data={dataTiktok} />,
     reels: <div>Reels</div>,
   };
 
