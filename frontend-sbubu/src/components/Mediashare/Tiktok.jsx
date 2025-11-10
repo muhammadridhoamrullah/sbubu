@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTiktokMetadata } from "../../store/tiktokSlice";
+import ReactPlayer from "react-player";
 import toast from "react-hot-toast";
 
 export default function Tiktok({ onDataChange, amount }) {
@@ -8,22 +9,11 @@ export default function Tiktok({ onDataChange, amount }) {
   const { data, error, loading, isComplete } = useSelector(
     (state) => state.tiktok
   );
-  console.log(data, "data Tiktok");
 
   // State
   const [tiktokUrl, setTiktokUrl] = useState("");
   const [tiktokId, setVideoId] = useState("");
   const [isValidUrl, setIsValidUrl] = useState(false);
-
-  //   State simpan metadata dari oEmbed Tiktok
-  const [videoTitle, setVideoTitle] = useState("");
-  const [videoAuthor, setVideoAuthor] = useState("");
-  const [videoThumbnail, setVideoThumbnail] = useState("");
-  const [videoHtml, setVideoHtml] = useState("");
-  const [videoDuration, setVideoDuration] = useState(0);
-
-  const [startMenit, setStartMenit] = useState(0);
-  const [startDetik, setStartDetik] = useState(0);
 
   //   Jalankan dispatch
   useEffect(() => {
@@ -39,23 +29,11 @@ export default function Tiktok({ onDataChange, amount }) {
     }
   }, [error]);
 
-  //   Simpan data metadata ketika fetch berhasil
-  useEffect(() => {
-    if (isComplete && data) {
-      setVideoTitle(data.title || "Tiktok Video");
-      setVideoAuthor(data.author_name || "User");
-      setVideoThumbnail(data.thumbnail_url || "");
-      setVideoHtml(data.html || "");
-
-      postMessage({ type: "play", "x-tiktok-player": true });
-    }
-  }, [isComplete, data]);
-
   //   Memberitahu parent component ketika data berubah
   useEffect(() => {
     if (isComplete && data && isValidUrl) {
       onDataChange({
-        tiktokId: tiktokId,
+        tiktokUrl: tiktokUrl,
         mediaDuration: kalkulasiDurasi(amount),
       });
     } else {
@@ -108,10 +86,6 @@ export default function Tiktok({ onDataChange, amount }) {
     } else {
       setVideoId("");
       setIsValidUrl(false);
-      setVideoTitle("");
-      setVideoAuthor("");
-      setVideoThumbnail("");
-      setVideoHtml("");
 
       if (url.trim() !== "") {
         toast.error("Invalid Tiktok URL");
@@ -142,9 +116,9 @@ export default function Tiktok({ onDataChange, amount }) {
     return <div>Loading...</div>;
   }
   return (
-    <div className="bg-pink-700 w-full h-fit flex flex-col gap-4 justify-start items-start">
+    <div className=" w-full h-fit flex flex-col gap-4 justify-start items-start">
       {/* Awal Input Link Tiktok */}
-      <div className="bg-red-900 w-full h-fit flex flex-col gap-2 justify-start items-start">
+      <div className=" w-full h-fit flex flex-col gap-2 justify-start items-start">
         {/* Awal Judul Link Video Tiktok */}
         <label>Link Video Tiktok</label>
         {/* Akhir Judul Link Video Tiktok */}
@@ -155,7 +129,7 @@ export default function Tiktok({ onDataChange, amount }) {
           name="tiktok"
           id="tiktok"
           value={tiktokUrl}
-          placeholder="https://www.tiktok.com/@iasinfiltro20000/video/7546704811874323725?is_from_webapp=1&sender_device=pc"
+          placeholder="https://www.tiktok.com/@dindinduaarr/video/7565919548239514898?lang=id-ID"
           onChange={changeHandler}
           className="w-full h-fit p-2 rounded-md placeholder:text-gray-500 outline-none bg-gray-800"
         />
@@ -169,16 +143,15 @@ export default function Tiktok({ onDataChange, amount }) {
       {isComplete && isValidUrl && tiktokId && (
         <div className="w-full h-fit flex flex-col gap-4 justify-start items-start overflow-hidden">
           {/* Awal Preview Video Tiktok */}
-          <div className="w-full max-w-sm mx-auto aspect-9/16 rounded-lg overflow-hidden bg-black relative">
-            <iframe
-              src={`https://www.tiktok.com/embed/v2/${tiktokId}`}
+          <div className=" w-full h-[500px] flex justify-center items-center relative ">
+            <ReactPlayer
+              controls
               width="100%"
-              height="100%"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              frameborder="0"
+              height={"500px"}
+              src={tiktokUrl}
+              autoPlay={true}
               className="absolute w-full h-full"
-            ></iframe>
+            />
           </div>
           {/* Akhir Preview Video Tiktok */}
 

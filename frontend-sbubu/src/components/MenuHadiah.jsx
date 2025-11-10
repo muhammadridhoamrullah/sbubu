@@ -99,7 +99,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
         return;
       }
     } else if (messageType === "tiktok") {
-      if (!mediaData || !mediaData.tiktokId) {
+      if (!mediaData || !mediaData.tiktokUrl) {
         toast.error("Silakan masukkan URL TikTok");
         return;
       }
@@ -130,8 +130,8 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       formData.append("startTime", mediaData?.startTime);
       formData.append("mediaDuration", mediaData?.mediaDuration);
       formData.append("message", payload.message || "");
-    } else if (messageType === "tiktok" && mediaData?.tiktokId) {
-      formData.append("tiktokId", mediaData?.tiktokId);
+    } else if (messageType === "tiktok" && mediaData?.tiktokUrl) {
+      formData.append("tiktokUrl", mediaData?.tiktokUrl);
       formData.append("mediaDuration", mediaData?.mediaDuration);
       formData.append("message", payload.message || "");
     } else if (messageType === "reels" && mediaData?.reelsUrl) {

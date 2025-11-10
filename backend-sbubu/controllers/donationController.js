@@ -67,8 +67,9 @@ class DonationController {
         videoId,
         startTime,
         mediaDuration,
-        tiktokId,
+        tiktokUrl,
       } = req.body;
+      console.log("Req Body Create", req.body);
 
       // Validasi Input
       if (!donorName || !amount) {
@@ -96,7 +97,7 @@ class DonationController {
       let finalStartTime = null;
       let finalMediaDuration = null;
       // Tiktok
-      let finalTiktokId = null;
+      let finalTiktokUrl = null;
 
       if (messageType === "voice" && req.file) {
         // ✅ Voice message
@@ -132,9 +133,11 @@ class DonationController {
             originalMessage = result.originalMessage;
           }
         }
-      } else if (messageType === "tiktok" && tiktokId) {
+      } else if (messageType === "tiktok" && tiktokUrl) {
+        console.log("tiktokUrl", tiktokUrl);
+
         // Tiktok mediashare
-        finalTiktokId = tiktokId;
+        finalTiktokUrl = tiktokUrl;
         finalMediaDuration = mediaDuration ? parseInt(mediaDuration) : 15;
 
         // Check message
@@ -211,7 +214,7 @@ class DonationController {
         startTime: finalStartTime,
         mediaDuration: finalMediaDuration,
         // Tiktok fields
-        tiktokId: finalTiktokId,
+        tiktokUrl: finalTiktokUrl,
       });
 
       res.status(201).json({
@@ -235,7 +238,7 @@ class DonationController {
           videoId: newDonation.videoId,
           startTime: newDonation.startTime,
           mediaDuration: newDonation.mediaDuration,
-          tiktokId: newDonation.tiktokId,
+          tiktokUrl: newDonation.tiktokUrl,
         },
         midtransToken: midtransToken.token,
         midtransRedirectUrl: midtransToken.redirect_url,
@@ -271,8 +274,6 @@ class DonationController {
           },
         ],
       });
-
-      console.log("Donation Contr", donation);
 
       if (!donation) {
         throw { name: "DONATION_NOT_FOUND" };
@@ -333,7 +334,7 @@ class DonationController {
           startTime: donation.startTime,
           mediaDuration: donation.mediaDuration,
           // Tiktok fields
-          tiktokId: donation.tiktokId,
+          tiktokUrl: donation.tiktokUrl,
         };
 
         // Emit ke room streamer

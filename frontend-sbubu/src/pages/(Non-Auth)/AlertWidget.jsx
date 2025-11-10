@@ -16,7 +16,7 @@ import TiktokWidget from "../../components/WidgetMediashare/TiktokWidget";
 export default function AlertWidget() {
   const [searchParams] = useSearchParams();
   const { overlayKey } = useParams();
-
+  const [suara, setSuara] = useState(false);
   // Ini hanya untuk preview mode
   const previewMode = searchParams.get("preview") === "true";
 
@@ -39,7 +39,9 @@ export default function AlertWidget() {
     donorName: "Muhammad Ridho Amrullah",
     amount: 1000000,
     message: "mas",
-    messageType: "text",
+    messageType: "tiktok",
+    tiktokUrl:
+      "https://www.tiktok.com/@dindinduaarr/video/7565919548239514898?lang=id-ID",
     createdAt: new Date(),
   };
 
@@ -89,13 +91,13 @@ export default function AlertWidget() {
   useEffect(() => {
     // Ini untuk preview mode
 
-    // if (previewMode && !isPlaying && !currentAlert) {
-    //   setCurrentAlert(dummyDonation);
-    //   setIsPlaying(true);
-    //   setIsVisible(true);
-    //   setAlertDuration(600000);
-    //   return;
-    // }
+    if (previewMode && !isPlaying && !currentAlert) {
+      setCurrentAlert(dummyDonation);
+      setIsPlaying(true);
+      setIsVisible(true);
+      setAlertDuration(600000);
+      return;
+    }
 
     // 1. Cek jika tidak sedang memutar alert dan ada item di queue
     if (!isPlaying && queue.length > 0) {
@@ -189,7 +191,7 @@ export default function AlertWidget() {
         nextAlert.mediaDuration
       ) {
         const mediaDurationMs = nextAlert.mediaDuration * 1000;
-        const bufferTime = 3000;
+        const bufferTime = 7000;
         duration = mediaDurationMs + bufferTime;
       } else {
         // ✅ For text: use amount-based duration
@@ -225,8 +227,18 @@ export default function AlertWidget() {
   // Jika tidaak ada currentAlert dan queue kosong serta bukan previewMode, tampilkan pesan waiting
   if (!currentAlert && queue.length === 0 && !previewMode) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-transparent text-white">
+      <div className="w-full h-screen flex flex-col gap-2 items-center justify-center bg-transparent text-white">
         <p className="text-sm opacity-50">Waiting for donations...</p>
+        <div
+          onClick={() => {
+            setSuara(true);
+          }}
+          className={`p-2 rounded-md  ${
+            suara ? "hidden" : "bg-blue-600"
+          } transition-all ease-in-out duration-1000`}
+        >
+          Click for Enable
+        </div>
       </div>
     );
   }
@@ -239,10 +251,11 @@ export default function AlertWidget() {
   };
 
   let dataTiktok = {
-    tiktokId: currentAlert?.tiktokId,
+    tiktokUrl: currentAlert?.tiktokUrl,
     mediaDuration: currentAlert?.mediaDuration,
     message: currentAlert?.message,
   };
+  console.log(dataTiktok, "Data tikotok");
 
   // Render media seesuai messageType
   const mediaComponents = {

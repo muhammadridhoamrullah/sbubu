@@ -1,17 +1,20 @@
+import ReactPlayer from "react-player";
+
 export default function TiktokWidget({ data }) {
   return (
-    <div className="w-full h-full p-4 flex flex-col gap-4 justify-center items-center">
+    <div className="w-full h-full p-4 flex flex-col gap-2 justify-center items-center">
       {/* Awal Video Tiktok */}
-      <div className="w-full max-w-sm mx-auto aspect-9/16 rounded-lg overflow-hidden bg-black relative">
-        <iframe
-          src={`https://www.tiktok.com/embed/v2/${data?.tiktokId}`}
+      <div className="w-full h-[250px] flex justify-center items-center relative ">
+        <ReactPlayer
+          src={data?.tiktokUrl}
           width="100%"
           height="100%"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-          frameborder="0"
+          autoPlay={true}
+          loop={true}
+          muted={false}
+          controls
           className="absolute w-full h-full"
-        ></iframe>
+        />
       </div>
       {/* Akhir Video Tiktok */}
 
@@ -22,3 +25,6 @@ export default function TiktokWidget({ data }) {
     </div>
   );
 }
+
+// https://www.tikwm.com/api/?url=https://www.tiktok.com/@dindinduaarr/video/7565919548239514898?lang=id-ID
+//  Iin utnuk full informasi data video tiktok tersebut, bisa dapat durasi

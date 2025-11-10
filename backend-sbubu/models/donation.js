@@ -138,7 +138,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      tiktokId: {
+      tiktokUrl: {
         type: DataTypes.STRING,
         allowNull: true,
       },
