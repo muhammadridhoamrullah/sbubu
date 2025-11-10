@@ -41,11 +41,11 @@ export function fetchTiktokMetadata(tiktokUrl) {
     try {
       dispatch(tiktokRequest());
 
-      const oEmbedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(
+      const tikWmApiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(
         tiktokUrl
       )}`;
 
-      const response = await fetch(oEmbedUrl);
+      const response = await fetch(tikWmApiUrl);
 
       if (!response.ok) {
         throw new Error("Failed to fetch TikTok metadata");
@@ -53,7 +53,7 @@ export function fetchTiktokMetadata(tiktokUrl) {
 
       const data = await response.json();
 
-      dispatch(tiktokSuccess(data));
+      dispatch(tiktokSuccess(data.data));
     } catch (error) {
       dispatch(
         tiktokError(

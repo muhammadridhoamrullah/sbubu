@@ -139,7 +139,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       tiktokUrl: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
     },

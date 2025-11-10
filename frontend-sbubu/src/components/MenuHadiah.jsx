@@ -134,6 +134,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
       formData.append("tiktokUrl", mediaData?.tiktokUrl);
       formData.append("mediaDuration", mediaData?.mediaDuration);
       formData.append("message", payload.message || "");
+      // formData.append("tiktokUrlVideoPlay", mediaData?.tiktokUrlVideoPlay);
     } else if (messageType === "reels" && mediaData?.reelsUrl) {
       formData.append("mediaUrl", mediaData?.mediaUrl);
       formData.append("mediaTitle", mediaData?.mediaTitle);

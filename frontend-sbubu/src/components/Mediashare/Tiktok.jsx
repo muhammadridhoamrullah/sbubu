@@ -9,11 +9,13 @@ export default function Tiktok({ onDataChange, amount }) {
   const { data, error, loading, isComplete } = useSelector(
     (state) => state.tiktok
   );
+  console.log("Data Tiktok", data);
 
   // State
   const [tiktokUrl, setTiktokUrl] = useState("");
   const [tiktokId, setVideoId] = useState("");
   const [isValidUrl, setIsValidUrl] = useState(false);
+  const [mediaDuration, setMediaDuration] = useState(0);
 
   //   Jalankan dispatch
   useEffect(() => {
@@ -34,7 +36,8 @@ export default function Tiktok({ onDataChange, amount }) {
     if (isComplete && data && isValidUrl) {
       onDataChange({
         tiktokUrl: tiktokUrl,
-        mediaDuration: kalkulasiDurasi(amount),
+        mediaDuration: durasiBerdasarkanAmount,
+        // tiktokUrlVideoPlay: data?.play,
       });
     } else {
       onDataChange(null);
@@ -54,6 +57,8 @@ export default function Tiktok({ onDataChange, amount }) {
   }
 
   const durasiBerdasarkanAmount = kalkulasiDurasi(amount);
+
+  // const finalDuration = Math.min(data?.duration || 0, durasiBerdasarkanAmount);
 
   //   Extract video ID dari URL Tiktok
   function extractVideoId(url) {
@@ -202,4 +207,55 @@ export default function Tiktok({ onDataChange, amount }) {
 //     "author_unique_id": "dindinduaarr",
 //     "embed_product_id": "7565919548239514898",
 //     "embed_type": "video"
+// }
+
+// {
+//     "id": "7565919548239514898",
+//     "region": "ID",
+//     "title": "LUCUUUKKKK #07 ",
+//     "cover": "https://p16-sign-sg.tiktokcdn.com/tos-alisg-p-0037/oE8rgULRA6wpScTfGKGAgcfoGijAiFfRgxIMeC~tplv-tiktokx-cropcenter-q:300:400:q72.jpeg?dr=14782&refresh_token=ebc6b7ef&x-expires=1762862400&x-signature=524%2B7aRClC7yuQlBVoyWbwXDZiI%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=maliva&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+//     "ai_dynamic_cover": "https://p16-sign-sg.tiktokcdn.com/tos-alisg-p-0037/oweRrvLfcgGVpoDAcUZAe6IijfglGYMGwm4xFF~tplv-tiktokx-origin.image?dr=1364&refresh_token=9822d3d3&x-expires=1762862400&x-signature=53J%2FnzqNPDltZvDXSiDzW52Y%2BP0%3D&t=bacd0480&ps=4f5296ae&shp=d05b14bd&shcp=1d1a97fc&idc=maliva&biz_tag=tt_video&s=AWEME_DETAIL&sc=dynamic_cover",
+//     "origin_cover": "https://p16-sign-sg.tiktokcdn.com/tos-alisg-p-0037/ocufj4K7RQ4HI6D0iCfF4vuEQGDCRQAVUAfz8d~tplv-tiktokx-360p.webp?dr=1363&refresh_token=4d6e9f5b&x-expires=1762862400&x-signature=jsFx5czMvoWXGb8lXOMdRtQUQ3U%3D&t=bacd0480&ps=d97f9a4f&shp=d05b14bd&shcp=1d1a97fc&idc=maliva&biz_tag=tt_video&s=AWEME_DETAIL&sc=feed_cover",
+//     "duration": 15,
+//     "play": "https://v16-coin.tiktokcdn.com/98b55cdf0032221ab8221f6ab8ed49af/6912345e/video/tos/alisg/tos-alisg-pve-0037c001/oUffwgpRGMDcxFicAIe8AiA9rLi6JjGRjoUG6f/?a=0&bti=OUBzOTg7QGo6OjZAL3AjLTAzYCMxNDNg&ch=0&cr=13&dr=0&er=0&lr=all&net=0&cd=0%7C0%7C0%7C&cv=1&br=2712&bt=1356&cs=0&ds=6&ft=-gnpiFvRoQyRgxROjJNC.UY5S93SgKPXtJh~.zoyqF_4&mime_type=video_mp4&qs=0&rc=ZDM0ZWloMzM8aWk7M2gzaUBpanFmZXQ5cjhyNjMzODczNEAuX2JfMjI1NS4xNDVhXi1fYSMvaWgxMmQ0a3NhLS1kMWBzcw%3D%3D&vvpl=1&l=20251110205159CD10E876BB39AC13BEBD&btag=e000b8000",
+//     "wmplay": "https://v16-coin.tiktokcdn.com/2ecb9bb41366b2073c8efe0d76c68326/6912345e/video/tos/alisg/tos-alisg-pve-0037c001/ocMfpcAfeAgFKcf1AGGj6oFUkIGwLRCrixLR1o/?a=0&bti=OUBzOTg7QGo6OjZAL3AjLTAzYCMxNDNg&ch=0&cr=13&dr=0&er=0&lr=all&net=0&cd=0%7C0%7C0%7C&cv=1&br=3006&bt=1503&cs=0&ds=3&ft=-gnpiFvRoQyRgxROjJNC.UY5S93SgKPXtJh~.zoyqF_4&mime_type=video_mp4&qs=0&rc=ODxkOmU1N2VpZWVlNWg2NEBpanFmZXQ5cjhyNjMzODczNEBiNF5iNTUwXzQxMV4yXjQzYSMvaWgxMmQ0a3NhLS1kMWBzcw%3D%3D&vvpl=1&l=20251110205159CD10E876BB39AC13BEBD&btag=e000b8000",
+//     "size": 2613242,
+//     "wm_size": 2895093,
+//     "music": "https://sf16-ies-music-sg.tiktokcdn.com/obj/tiktok-obj/7537866286139886352.mp3",
+//     "music_info": {
+//         "id": "7537866287918795537",
+//         "title": "original sound - Risss_Budi",
+//         "play": "https://sf16-ies-music-sg.tiktokcdn.com/obj/tiktok-obj/7537866286139886352.mp3",
+//         "cover": "https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/31be656002108eb3d4fbc69358547c4c~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=c1eebb79&x-expires=1762862400&x-signature=DkaSGD6nONDAzLhN4lC54b1FQQU%3D&t=4d5b0474&ps=13740610&shp=d05b14bd&shcp=34ff8df6&idc=maliva",
+//         "author": "Risss_Budi",
+//         "original": true,
+//         "duration": 29,
+//         "album": ""
+//     },
+//     "play_count": 705204,
+//     "digg_count": 67801,
+//     "comment_count": 159,
+//     "share_count": 2803,
+//     "download_count": 423,
+//     "collect_count": 6470,
+//     "create_time": 1761577922,
+//     "anchors": null,
+//     "anchors_extras": "",
+//     "is_ad": false,
+//     "commerce_info": {
+//         "adv_promotable": false,
+//         "auction_ad_invited": false,
+//         "branded_content_type": 0,
+//         "organic_log_extra": "{\"req_id\":\"20251110205159CD10E876BB39AC13BEBD\"}",
+//         "with_comment_filter_words": false
+//     },
+//     "commercial_video_info": "",
+//     "item_comment_settings": 0,
+//     "mentioned_users": "",
+//     "author": {
+//         "id": "7496840346988626965",
+//         "unique_id": "dindinduaarr",
+//         "nickname": "dindinn",
+//         "avatar": "https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/aa85a0503dc3f18e3c092dc204b47cff~tplv-tiktokx-cropcenter:300:300.jpeg?dr=14577&refresh_token=794d053c&x-expires=1762862400&x-signature=DQl8k0Sql1JgYwgj5bGkaSLRlFM%3D&t=4d5b0474&ps=13740610&shp=d05b14bd&shcp=34ff8df6&idc=maliva"
+//     }
 // }

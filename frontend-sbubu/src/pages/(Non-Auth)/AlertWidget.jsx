@@ -41,7 +41,7 @@ export default function AlertWidget() {
     message: "mas",
     messageType: "tiktok",
     tiktokUrl:
-      "https://www.tiktok.com/@dindinduaarr/video/7565919548239514898?lang=id-ID",
+      "https://www.tiktok.com/@emilyulaphan/video/7565421852085079317?lang=id-ID",
     createdAt: new Date(),
   };
 
@@ -315,7 +315,7 @@ export default function AlertWidget() {
             {/* Akhir Amount */}
 
             {/* Awal Message */}
-            <div className=" bg-[#B30838]  w-full h-fit text-white rounded-2xl text-justify text-lg font-medium flex flex-col overflow-hidden gap-3">
+            <div className=" bg-[#B30838]  w-full h-fit text-white rounded-2xl text-justify text-lg font-medium flex flex-col overflow-hidden gap-2">
               {/* Awal Isi Message */}
 
               {mediaComponents[currentAlert.messageType] || (

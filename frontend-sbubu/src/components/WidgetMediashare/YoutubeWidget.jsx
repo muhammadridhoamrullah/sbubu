@@ -2,9 +2,9 @@ import YouTube from "react-youtube";
 
 export default function YoutubeWidget({ data }) {
   return (
-    <div className="w-full h-full p-4 flex flex-col gap-4 justify-center items-center">
+    <div className="w-full h-full flex flex-col gap-2 justify-center items-center">
       {/* Awal Video Youtube */}
-      <div className="w-full h-fit aspect-video  rounded-md overflow-hidden relative">
+      <div className="w-full h-fit aspect-video   overflow-hidden relative">
         <YouTube
           videoId={data?.videoId}
           opts={{
@@ -24,7 +24,7 @@ export default function YoutubeWidget({ data }) {
       </div>
       {/* Akhir Video Youtube */}
       {/* Awal Message */}
-      <div className="text-justify">{data?.message}</div>
+      <div className="px-4 text-justify">{data?.message}</div>
       {/* Akhir Message */}
     </div>
   );

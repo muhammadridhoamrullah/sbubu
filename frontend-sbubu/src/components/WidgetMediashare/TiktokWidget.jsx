@@ -2,9 +2,9 @@ import ReactPlayer from "react-player";
 
 export default function TiktokWidget({ data }) {
   return (
-    <div className="w-full h-full p-4 flex flex-col gap-2 justify-center items-center">
+    <div className=" w-full h-full   flex flex-col gap-2 justify-center items-center">
       {/* Awal Video Tiktok */}
-      <div className="w-full h-[250px] flex justify-center items-center relative ">
+      <div className="w-full h-[250px] flex justify-center items-center relative overflow-hidden">
         <ReactPlayer
           src={data?.tiktokUrl}
           width="100%"
@@ -12,14 +12,13 @@ export default function TiktokWidget({ data }) {
           autoPlay={true}
           loop={true}
           muted={false}
-          controls
           className="absolute w-full h-full"
         />
       </div>
       {/* Akhir Video Tiktok */}
 
       {/* Awal Message */}
-      <div className="text-justify">{data?.message}</div>
+      <div className="px-4 text-justify">{data?.message}</div>
 
       {/* Akhir Message */}
     </div>
