@@ -68,7 +68,6 @@ class DonationController {
         startTime,
         mediaDuration,
         tiktokUrl,
-        
       } = req.body;
       console.log("Req Body Create", req.body);
 
@@ -446,6 +445,31 @@ class DonationController {
     } catch (error) {
       console.log(error, "<<< error getMyDonationHistory");
 
+      next(error);
+    }
+  }
+
+  static async getDonationByOrderId(req, res, next) {
+    try {
+      const { orderId } = req.params;
+
+      const findDonation = await Donation.findOne({
+        where: { OrderId: orderId },
+        include: [
+          {
+            model: User,
+            as: "Recipient",
+            attributes: ["username", "name", "avatarUrl"],
+          },
+        ],
+      });
+
+      if (!findDonation) {
+        throw { name: "DONATION_NOT_FOUND" };
+      }
+
+      res.status(200).json({ findDonation });
+    } catch (error) {
       next(error);
     }
   }

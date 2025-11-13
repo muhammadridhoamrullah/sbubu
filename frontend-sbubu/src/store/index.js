@@ -6,6 +6,7 @@ import pembayaranReducer from "./pembayaranSlice";
 import userReducer from "./userSlice";
 import filterReducer from "./filterSlice";
 import tiktokReducer from "./tiktokSlice";
+import transactionReducer from "./transactionSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     user: userReducer,
     filter: filterReducer,
     tiktok: tiktokReducer,
+    transaction: transactionReducer,
   },
 });

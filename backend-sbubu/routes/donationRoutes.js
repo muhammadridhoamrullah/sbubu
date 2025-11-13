@@ -24,4 +24,9 @@ donationRouter.get(
 
 donationRouter.get("/:username", DonationController.getStreamerDonations);
 
+donationRouter.get(
+  "/transaction/:orderId",
+  DonationController.getDonationByOrderId
+);
+
 module.exports = donationRouter;
