@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LocalFont from "next/font/local";
-
+import ToasterClient from "./components/ToasterClient";
+import ReduxProvider from "./store/ProviderRedux";
 const momoTrust = LocalFont({
   src: "../../public/fonts/MomoTrustDisplay-Regular.ttf",
   variable: "--font-momo-trust",
@@ -34,7 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${momoTrust.className} antialiased `}>{children}</body>
+      <body className={`${momoTrust.className} antialiased `}>
+        <ReduxProvider>
+          <ToasterClient />
+          {children}
+        </ReduxProvider>
+      </body>
     </html>
   );
 }

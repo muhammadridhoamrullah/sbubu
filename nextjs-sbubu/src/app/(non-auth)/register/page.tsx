@@ -1,15 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Loading from "./loading";
 import { RiEyeCloseLine } from "react-icons/ri";
 import { RiEyeLine } from "react-icons/ri";
+import Link from "next/link";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { doRegister, registerReset } from "@/app/store/registerSlice";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useRouter();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMatchingPassword, setErrorMatchingPassword] = useState(false);
-
+  const dispatch = useAppDispatch();
+  const { dataRegis, errorRegis, loadingRegis, isRegistered } = useAppSelector(
+    (state) => state.register
+  );
+  // State Checkbox T&C
+  const [checked, setChecked] = useState(false);
   const [formRegister, setFormRegister] = useState({
     name: "",
     email: "",
@@ -18,6 +30,31 @@ export default function Register() {
     confirmPassword: "",
   });
 
+  useEffect(() => {
+    if (errorRegis) {
+      toast.error(`Register Failed: ${errorRegis}`);
+    }
+  }, [errorRegis]);
+
+  useEffect(() => {
+    if (isRegistered) {
+      setFormRegister({
+        name: "",
+        email: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setChecked(false);
+      setErrorMatchingPassword(false);
+
+      dispatch(registerReset());
+
+      navigate.push("/login");
+    }
+  }, [isRegistered, navigate, dispatch]);
+
   function changeHandler(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
 
@@ -25,6 +62,12 @@ export default function Register() {
       ...formRegister,
       [name]: value,
     });
+  }
+
+  async function submitHandler(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const { confirmPassword, ...formRegis } = formRegister;
+    dispatch(doRegister(formRegis));
   }
 
   function toggleShowPassword() {
@@ -69,7 +112,10 @@ export default function Register() {
       {/* Akhir Create Your Account */}
 
       {/* Awal Form Register */}
-      <div className="w-[550px] h-fit p-4 border-2 border-gray-600 rounded-lg flex flex-col gap-2 overflow-hidden transition-all duration-1000">
+      <form
+        onSubmit={submitHandler}
+        className="w-[550px] h-fit p-4 border-2 border-gray-600 rounded-lg flex flex-col gap-2 overflow-hidden transition-all duration-1000"
+      >
         {/* Awal Your Name */}
         <div className={classForDivInput}>
           {/* Awal Label */}
@@ -86,6 +132,7 @@ export default function Register() {
             placeholder="Dewa Beras Gerlong"
             onChange={changeHandler}
             className={classForInput}
+            value={formRegister.name}
             required
           />
           {/* Akhir Input Your Name */}
@@ -110,6 +157,7 @@ export default function Register() {
             onChange={changeHandler}
             className={classForInput}
             required
+            value={formRegister.email}
           />
           {/* Akhir Input Email Address */}
         </div>
@@ -230,7 +278,54 @@ export default function Register() {
           {/* Akhir Pesan Error Matching Pass */}
         </div>
         {/* Akhir Confirm Password */}
-      </div>
+
+        {/* Awal Terms & Conditions */}
+        <div className="text-xl font-bold mt-2">
+          Terms & Conditions <span className="text-red-500">*</span>
+        </div>
+        {/* Akhir Terms & Conditions */}
+
+        {/* Awal Agree With T&C */}
+        <div className="w-full h-fit flex justify-start items-center gap-2">
+          {/* Awal Checkbox */}
+          <input
+            type="checkbox"
+            name="checked"
+            id="checked"
+            checked={checked}
+            onChange={(e) => setChecked(e.target.checked)}
+            className="cursor-pointer accent-blue-500 w-4 h-4"
+          />
+          {/* Akhir Checkbox */}
+          {/* Awal I Agree */}
+          <label>I agree with Terms & Conditions</label>
+          {/* Akhir I Agree */}
+        </div>
+        {/* Akhir Agree With T&C */}
+
+        {/* Awal Button Submit */}
+        <button
+          disabled={!checked || errorMatchingPassword}
+          type="submit"
+          className="mt-2 bg-green-900 hover:bg-green-950 p-2 w-full h-12 rounded-md transition-all duration-300  text-lg cursor-pointer disabled:bg-gray-800 disabled:cursor-not-allowed"
+        >
+          {loadingRegis ? (
+            <AiOutlineLoading3Quarters className="m-auto text-2xl animate-spin" />
+          ) : (
+            "Create Your Account"
+          )}
+        </button>
+        {/* Akhir Button Submit */}
+
+        {/* Awal Sudah Punya Akun? */}
+        <div className="mt-2">
+          Sudah punya akun?{" "}
+          <Link className="text-blue-700 hover:text-blue-900" href={"/login"}>
+            Sign In
+          </Link>
+        </div>
+        {/* Akhir Sudah Punya Akun? */}
+      </form>
       {/* Akhir Form Register */}
     </div>
   );
