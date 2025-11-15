@@ -43,3 +43,22 @@ export async function sendVerificationEmail(data: dataVerif) {
 
   await transporter.sendMail(mailOptions);
 }
+
+export async function sendNotificationLogin(email: string) {
+  const mailOptions = {
+    from: myEmail,
+    to: email,
+    subject: "SBUBU - New Login Notification",
+    html: `
+    <h1>New Login Detected</h1>
+        <p>We noticed a new login to your SBUBU account.</p>
+        <p>If this was you, no further action is needed.</p>
+        <p>If you did not log in, please secure your account immediately.</p>
+        <p>Thank you!</p>
+        <p>Best regards,</p>
+        <p>SBUBU Team</p>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+}

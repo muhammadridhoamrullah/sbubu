@@ -47,27 +47,27 @@ export function doLogin(FormLogin: DataFormLogin) {
     try {
       dispatch(loginRequest());
 
-      //   const response = await fetch(
-      //     `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/users/login`,
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify(FormLogin),
-      //       cache: "no-store",
-      //     }
-      //   );
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_CLIENT_URL}/api/users/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(FormLogin),
+          cache: "no-store",
+        }
+      );
 
-      //   if (!response.ok) {
-      //     throw new Error(`Login failed with status ${response.status}`);
-      //   }
+      if (!response.ok) {
+        throw new Error(`Login failed with status ${response.status}`);
+      }
 
-      //   const data = await response.json();
+      const data = await response.json();
 
-      //   Cookie.set("accessToken", data.accessToken);
+      Cookie.set("accessToken", data.accessToken);
 
-      dispatch(loginSuccess("yey berhasil login"));
+      dispatch(loginSuccess(data.accessToken));
     } catch (error) {
       let errorMessage = "An unknown error occurred.";
       if (error instanceof z.ZodError) {

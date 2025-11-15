@@ -21,26 +21,9 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.log(error, "err");
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        {
-          message: error.message,
-        },
-        {
-          status: 500,
-        }
-      );
-    } else {
-      return NextResponse.json(
-        {
-          message: "Internal Server Error",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Unknown error" },
+      { status: 400 }
+    );
   }
 }

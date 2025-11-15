@@ -7,5 +7,15 @@ export function signToken(payload: JwtPayload) {
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, SECRET as string);
+  try {
+    return jwt.verify(token, SECRET as string) as JwtPayload;
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Error("Invalid token");
+    } else if (error instanceof jwt.TokenExpiredError) {
+      throw new Error("Token expired");
+    } else {
+      throw new Error("Token verification failed");
+    }
+  }
 }
