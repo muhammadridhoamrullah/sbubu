@@ -93,7 +93,7 @@ export default function Register() {
   const classForDivInput =
     "w-full h-fit flex flex-col gap-2 justify-start items-start";
   const classForInput =
-    "w-full h-12 p-2 outline-none border-2 border-gray-800 rounded-md focus:border-2 focus:border-blue-900 transition-all duration-1000 placeholder:text-gray-700";
+    "w-full h-12 p-2 outline-none border-2 border-gray-800 rounded-md  focus:border-blue-900 transition-all duration-1000 placeholder:text-gray-700";
 
   return (
     <div className="bg-black w-full min-h-screen py-8 flex flex-col gap-4 justify-start items-center text-white">
