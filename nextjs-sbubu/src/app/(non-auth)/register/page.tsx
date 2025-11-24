@@ -10,6 +10,7 @@ import { doRegister, registerReset } from "@/app/store/registerSlice";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import Footer from "@/app/components/Footer";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -327,6 +328,10 @@ export default function Register() {
         {/* Akhir Sudah Punya Akun? */}
       </form>
       {/* Akhir Form Register */}
+
+      {/* Awal Footer */}
+      <Footer />
+      {/* Akhir Footer */}
     </div>
   );
 }

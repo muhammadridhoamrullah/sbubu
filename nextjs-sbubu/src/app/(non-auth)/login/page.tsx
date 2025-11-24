@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { doLogin } from "@/app/store/loginSlice";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import Footer from "@/app/components/Footer";
 
 export default function Login() {
   const { dataLogin, errorLogin, loadingLogin, isLogin } = useAppSelector(
@@ -153,6 +154,10 @@ export default function Login() {
         {/* Akhir Button Submit */}
       </form>
       {/* Akhir Form Login */}
+
+      {/* Awal Footer */}
+      <Footer />
+      {/* Akhir Footer */}
     </div>
   );
 }
