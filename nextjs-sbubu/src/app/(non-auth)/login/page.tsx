@@ -9,6 +9,7 @@ import { doLogin } from "@/app/store/loginSlice";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Footer from "@/app/components/Footer";
+import Cookies from "js-cookie";
 
 export default function Login() {
   const { dataLogin, errorLogin, loadingLogin, isLogin } = useAppSelector(
@@ -29,8 +30,15 @@ export default function Login() {
   }, [errorLogin]);
 
   useEffect(() => {
+    const token = Cookies.get("accessToken");
+    if (token) {
+      navigate.push("/");
+    }
+  }, []);
+
+  useEffect(() => {
     if (isLogin && dataLogin) {
-      //   navigate.push("/dashboard");
+      navigate.push("/");
       toast.success("Login successful!");
     }
   }, [isLogin, dataLogin]);
