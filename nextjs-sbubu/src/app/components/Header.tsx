@@ -1,10 +1,23 @@
+"use client";
 import Link from "next/link";
 import { TbUserCircle } from "react-icons/tb";
 import Cookie from "js-cookie";
 import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchHeaderData } from "../store/headerSlice";
 
-export default async function Header() {
+export default function Header() {
   const token = Cookie.get("accessToken");
+  const dispatch = useAppDispatch();
+  const { dataHeader, errorHeader, loadingHeader } = useAppSelector(
+    (state) => state.header
+  );
+
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchHeaderData());
+    }
+  }, [token, dispatch]);
 
   return (
     <div className="border border-[#0E1948] w-full h-fit p-4 rounded-xl flex justify-between items-center">
@@ -20,19 +33,19 @@ export default async function Header() {
       {/* Awal Button Login */}
 
       {token ? (
-        <div className=" w-fit h-fit  flex justify-center items-center gap-2">
+        <Link
+          href={`/creator/${dataHeader?.username}`}
+          className=" w-fit h-fit  flex justify-center items-center gap-2 hover:bg-[#0E1948]/40 px-2 rounded-md transition-all duration-500"
+        >
           {/* Awal Logo Sbubu */}
-          <Link
-            href={"/profile"}
-            className=" w-10 h-10 overflow-hidden rounded-full relative"
-          >
+          <div className=" w-10 h-10 overflow-hidden rounded-full relative">
             <TbUserCircle className="w-full h-full absolute" />
-          </Link>
+          </div>
           {/* Akhir Logo Sbubu */}
           {/* Awal Tanda Bawah/Atas */}
-          <div></div>
+          <div>{dataHeader?.username}</div>
           {/* Akhir Tanda Bawah/Atas */}
-        </div>
+        </Link>
       ) : (
         <Link href={"/login"} className="bg-orange-700 py-2 px-4 rounded-md">
           Login

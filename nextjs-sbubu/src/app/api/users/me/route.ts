@@ -1,12 +1,32 @@
+import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import * as jose from "jose";
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get("x-user-id");
-    if (!userId) {
-      throw new Error("User ID not found in headers");
+    const cookiesAuth = await (await cookies()).get("accessToken");
+
+    if (!cookiesAuth) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
     }
-    const username = request.headers.get("x-username");
+
+    const token = cookiesAuth.value;
+
+    const secret = new TextEncoder().encode(process.env.SECRET_KEY);
+    const decoded = await jose.jwtVerify<{ _id: string; username: string }>(
+      token,
+      secret
+    );
+
+    const userId = decoded.payload._id;
+    const username = decoded.payload.username;
 
     return NextResponse.json(
       {

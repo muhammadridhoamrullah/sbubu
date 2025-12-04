@@ -16,7 +16,7 @@ const tokenCache = new Map<
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 menit dalam milidetik
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     // Ambil token dari cookie
     const cookiesAuth = await (await cookies()).get("accessToken");

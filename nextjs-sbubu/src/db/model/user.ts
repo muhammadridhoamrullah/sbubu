@@ -179,10 +179,33 @@ export async function loginUser(input: UserInputLogin) {
 
   const accessToken = signToken({
     _id: findUser._id.toString(),
+    username: findUser.username,
+    email: findUser.email,
   });
 
   await sendNotificationLogin(findUser.email);
   return accessToken;
+}
+
+export async function getUserByUsername(username: string) {
+  const db = await getDb();
+
+  const findUser = await db.collection(COLL).findOne(
+    {
+      username,
+    },
+    {
+      projection: {
+        password: 0,
+      },
+    }
+  );
+
+  if (!findUser) {
+    throw new Error("User not found");
+  }
+
+  return findUser;
 }
 
 //   _id: string;
