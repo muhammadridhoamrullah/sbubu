@@ -146,9 +146,11 @@ module.exports = (sequelize, DataTypes) => {
       paranoid: true,
     }
   );
-  User.beforeCreate((user) => {
-    user.password = hashPassword(user.password);
+  User.beforeValidate((user) => {
     user.overlayKey = generateOverlayKey();
+  });
+  User.beforeCreate(async (user) => {
+    user.password = await hashPassword(user.password);
   });
   return User;
 };
