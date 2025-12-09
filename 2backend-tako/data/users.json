@@ -3,7 +3,8 @@
     "username": "goyounjung",
     "email": "goyounjung@gmail.com",
     "password": "1234567890",
-    "name": "Go Youn Jung"
+    "name": "Go Youn Jung",
+    "role": "user"
   },
   {
     "username": "SuperAdmin",

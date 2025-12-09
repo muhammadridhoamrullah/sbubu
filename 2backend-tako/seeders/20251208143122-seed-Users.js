@@ -6,7 +6,7 @@ const generateOverlayKey = require("../helpers/generateOverlayKey");
 module.exports = {
   async up(queryInterface, Sequelize) {
     data = data.map((el) => {
-      el.craetedAt = new Date();
+      el.createdAt = new Date();
       el.updatedAt = new Date();
       el.password = hashPassword(el.password);
       el.overlayKey = generateOverlayKey();
