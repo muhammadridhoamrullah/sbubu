@@ -17,7 +17,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
 
   const dispatch = useDispatch();
   const { loading, data, error, isCompleted } = useSelector(
-    (state) => state.pembayaran
+    (state) => state.pembayaran,
   );
 
   const [hideFromCreator, setHideFromCreator] = useState(false);
@@ -203,7 +203,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
               "Menunggu pembayaran Anda diselesaikan. Akan diarahkan ke halaman detail transaksi.",
               {
                 icon: "⏳",
-              }
+              },
             );
             await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -222,7 +222,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
         },
         onError: async function (result) {
           toast.error(
-            "Terjadi kesalahan pada pembayaran Anda. Silakan coba lagi."
+            "Terjadi kesalahan pada pembayaran Anda. Silakan coba lagi.",
           );
 
           try {
@@ -473,7 +473,7 @@ export default function MenuHadiah({ dataStreamer, dataUser }) {
           <textarea
             name="message"
             id="message"
-            placeholder="Halo kreator favoritku, aku nge fans banget dech sama kamyuh"
+            placeholder="Halo kreator favoritku, aku nge fans banget sama kamu"
             className="outline-none w-full h-40 bg-[#1A2B32] rounded-md p-2 placeholder:text-gray-500"
             value={formDonation.message}
             maxLength={500}

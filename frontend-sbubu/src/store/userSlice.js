@@ -74,7 +74,7 @@ export const {
   editProfileRequest,
   editProfileSuccess,
   editProfileError,
-  editProfileReset
+  editProfileReset,
 } = userSlice.actions;
 
 export function fetchUserData() {

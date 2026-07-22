@@ -5,7 +5,7 @@ if (process.env.NODE_ENV !== "production") {
 const express = require("express");
 const http = require("http");
 const app = express();
-const port = 3000;
+const port = 3001;
 const cors = require("cors");
 const router = require("./routes");
 const path = require("path");
@@ -34,9 +34,8 @@ app.use(
         res.setHeader("Content-Type", "audio/mpeg");
       }
     },
-  })
+  }),
 ); // Serve static files from the 'public' directory
-
 
 app.use(
   "/uploads",
@@ -46,7 +45,7 @@ app.use(
         res.set("Content-Type", "audio/webm");
       }
     },
-  })
+  }),
 );
 
 // Socket.io Connection Handling
