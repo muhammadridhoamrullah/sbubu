@@ -83,6 +83,10 @@ jobs:
         if: steps.filter.outputs.frontend == 'true'
         run: npm ci
 
+      - name: Lint
+        if: steps.filter.outputs.frontend == 'true'
+        run: npm run lint
+
       - name: Build (memastikan Vite build sukses)
         if: steps.filter.outputs.frontend == 'true'
         run: npm run build
