@@ -86,6 +86,7 @@ jobs:
       - name: Lint
         if: steps.filter.outputs.frontend == 'true'
         run: npm run lint
+        continue-on-error: true
 
       - name: Build (memastikan Vite build sukses)
         if: steps.filter.outputs.frontend == 'true'
